@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorPrimary">#1BC184</color> <!-- Action Bar 3F51B5-->
+    <color name="colorPrimaryDark">#1daf84</color> <!-- Status Bar 303F9F-->
     <color name="colorAccent">#FF4081</color>
+
+    <color name="ganjify">#1bc184</color>
+    <color name="feed_time">#999999</color>
+    <color name="feed_add_separator">#e5e5e5</color>
 
     <color name="login_title">#494949</color>
     <color name="login_text_button">#ffffff</color>

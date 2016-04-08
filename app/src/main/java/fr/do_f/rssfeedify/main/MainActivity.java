@@ -1,9 +1,11 @@
-package fr.do_f.rssfeedify;
+package fr.do_f.rssfeedify.main;
 
+import android.app.Activity;
+import android.app.FragmentManager;
+import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -13,24 +15,34 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+import fr.do_f.rssfeedify.R;
+import fr.do_f.rssfeedify.main.feed.FeedFragment;
+import fr.do_f.rssfeedify.main.feed.activity.AddFeedActivity;
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    @Bind(R.id.fab)
+    FloatingActionButton    fab;
+
+    public static void newActivity(Activity activity)
+    {
+        Intent i = new Intent(activity, MainActivity.class);
+        activity.startActivity(i);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+        fab.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.ganjify)));
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -40,6 +52,12 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        FragmentManager fm = getFragmentManager();
+        fm.beginTransaction()
+                .replace(R.id.container, FeedFragment.newInstance())
+                .addToBackStack(null)
+                .commit();
     }
 
     @Override
@@ -97,5 +115,15 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    @OnClick(R.id.fab)
+    public void onFabClick()
+    {
+        int[] startingLocation = new int[2];
+        fab.getLocationOnScreen(startingLocation);
+        startingLocation[0] += fab.getWidth() / 2;
+        AddFeedActivity.newActivity(startingLocation, this);
+        overridePendingTransition(0, 0);
     }
 }

@@ -22,10 +22,29 @@
     <string name="login_login_password">Password</string>
     <string name="login_login_login">Login</string>
 
+    <string name="login_error_bad_credentials">Bad username or password</string>
+    <string name="login_error_bad_params">Bad params</string>
+
+
     <!-- Login Register -->
     <string name="login_register_title">Register to Feedify</string>
     <string name="login_register_username">Username</string>
     <string name="login_register_password">Password</string>
     <string name="login_register_login">Register</string>
+    <string name="login_register_error_already_exists">Already exists</string>
+    <string name="login_register_error_bad_params">Bad params</string>
+    <string name="login_register_success">Your account has been created</string>
+
+    <!-- FEED -->
+    <string name="feed_tmp">Chrome is starting to support native OS X notifications</string>
+    <string name="feed_tmp2">Google is building support for OS X\'s</string>
+    <string name="feed_time">Feb 20, 2016, 5:13:55 PM</string>
+    <string name="feed_image">https://cdn2.vox-cdn.com/thumbor/c1SboxNb2sWxrO_IV6Bhu6itscI=/0x0:1226x817/1310x873/cdn0.vox-cdn.com/uploads/chorus_image/image/49253627/Screen_Shot_2016-04-06_at_6.34.56_PM.0.0.png</string>
+
+    <!-- Add Feed -->
+    <string name="feed_add_text">Ajouter un feed</string>
+    <string name="feed_add_button">Ajouter</string>
+    <string name="feed_add_et_hint_name">Nom</string>
+    <string name="feed_add_et_hint_url">Url</string>
 
 </resources>

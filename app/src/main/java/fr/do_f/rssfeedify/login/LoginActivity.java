@@ -1,6 +1,8 @@
 package fr.do_f.rssfeedify.login;
 
 import android.app.FragmentManager;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 
 import android.support.v4.app.Fragment;
@@ -10,9 +12,11 @@ import android.os.Bundle;
 
 import butterknife.OnClick;
 import fr.do_f.rssfeedify.R;
+import fr.do_f.rssfeedify.Utils;
 import fr.do_f.rssfeedify.login.fragment.LoginFragment;
 import fr.do_f.rssfeedify.login.fragment.MenuFragment;
 import fr.do_f.rssfeedify.login.fragment.RegisterFragment;
+import fr.do_f.rssfeedify.main.MainActivity;
 
 public class LoginActivity extends AppCompatActivity
         implements MenuFragment.OnFragmentInteractionListener {
@@ -23,6 +27,13 @@ public class LoginActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        SharedPreferences sp = getSharedPreferences(Utils.SP, Context.MODE_PRIVATE);
+
+        if (!sp.getString(Utils.TOKEN, "null").equals("null"))
+        {
+            MainActivity.newActivity(this);
+            finish();
+        }
 
         fm = getFragmentManager();
         fm.beginTransaction()

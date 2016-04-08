@@ -23,7 +23,7 @@ public class RestClient {
     private final static String WEBSERVICE_HOST = "http://romain-zanchi.com:4498/api/";
 
     static {
-
+        setupRestClient();
     }
 
     private RestClient()
