@@ -20,7 +20,7 @@ API Documentation : http://romain-zanchi.com:4497
 
 ### Specs ###
 
-* Android Studio 1.5
+* Android Studio 2
 * MinSdk 16
 * targetSdk 23
 * applicationId "fr.do_f.rssfeedify"
