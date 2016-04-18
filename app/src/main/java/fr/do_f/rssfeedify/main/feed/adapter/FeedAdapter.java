@@ -6,32 +6,41 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.TextView;
 
 import com.facebook.drawee.view.SimpleDraweeView;
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+
+import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import fr.do_f.rssfeedify.R;
+import fr.do_f.rssfeedify.api.json.feeds.FeedResponse;
+import fr.do_f.rssfeedify.api.json.feeds.FeedResponse.*;
+
 
 /**
  * Created by do_f on 06/04/16.
  */
 public class FeedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    // TODO: add LIST
-    private int size;
+    private static final String TAG = "FeedAdapter";
 
     private onItemClickListener onItemClickListener;
+    private List<Articles>      articles;
 
     public interface onItemClickListener {
-        void onItemClick(int position);
+        void onItemClick(Articles articles, View v);
     }
 
-    public FeedAdapter(int size)
-    {
-        this.size = size;
+    public FeedAdapter(List<Articles> articles) {
+        this.articles = articles;
+        setImage();
     }
 
     @Override
@@ -44,17 +53,19 @@ public class FeedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        ((CellFeedViewHolder) holder).bindView(position);
+        ((CellFeedViewHolder) holder).bindView(articles.get(position));
     }
 
     @Override
     public int getItemCount() {
-        return size;
+        return articles.size();
     }
 
-    public synchronized void refreshAdapter(int size) {
-        // TODO: clear and update the list
-        this.size = size;
+    public synchronized void refreshAdapter(List<Articles> newArticles, boolean wipedata) {
+        if (wipedata)
+            this.articles.clear();
+        this.articles.addAll(newArticles);
+        setImage();
         notifyDataSetChanged();
     }
 
@@ -62,8 +73,25 @@ public class FeedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         this.onItemClickListener = onItemClickListener;
     }
 
+    public void setImage() {
+        for (Articles a : this.articles) {
+            //Log.d(TAG, "setImage");
+            Document doc = Jsoup.parse(a.getFull());
+
+            for (Element e : doc.getElementsByTag("img")) {
+                if (e.attr("src").length() != 0 && e.attr("width").length() != 0) {
+                    a.setUrl(e.attr("src"));
+                    break;
+                }
+            }
+        }
+    }
+
     public class CellFeedViewHolder extends RecyclerView.ViewHolder
     {
+
+        @Bind(R.id.feed_title)
+        TextView            title;
 
         @Bind(R.id.feed_image)
         SimpleDraweeView    image;
@@ -76,20 +104,22 @@ public class FeedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             ButterKnife.bind(this, view);
         }
 
-        public void bindView(final int position)
+        public void bindView(final Articles articles)
         {
-            Uri uri;
-            if (position % 10 == 0) {
-                uri = Uri.parse("https://cdn2.vox-cdn.com/thumbor/k7NG0DDf5fLxvAuOZ2lU2KBkT7k=/50x0:2450x1600/1310x873/cdn0.vox-cdn.com/uploads/chorus_image/image/49252681/reddit-ios-app-screenshots.0.0.jpg");
+            if (articles.getUrl() != null) {
+                image.setVisibility(View.VISIBLE);
+                Uri uri = Uri.parse(articles.getUrl());
+                image.setImageURI(uri);
             } else {
-                uri = Uri.parse(v.getResources().getString(R.string.feed_image));
+                image.setVisibility(View.GONE);
             }
-            image.setImageURI(uri);
+
+            title.setText(articles.getTitle());
             v.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     if (onItemClickListener != null)
-                        onItemClickListener.onItemClick(position);
+                        onItemClickListener.onItemClick(articles, v);
                 }
             });
         }

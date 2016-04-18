@@ -7,5 +7,8 @@ public class Utils {
     public static final String      SP = "fr.do_f.rssfeedify";
     public static final String      TOKEN = "fr.do_f.rssfeedify.token";
 
+    public static final String      HOME = "home";
+    public static final String      FEEDBYID = "feedbyid";
+
     public static final int         ANIM_DURATION = 250;
 }

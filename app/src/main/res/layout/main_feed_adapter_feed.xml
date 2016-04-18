@@ -21,8 +21,7 @@
             android:layout_width="110dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:background="@drawable/logo"
-            fresco:placeholderImage="@drawable/logo"
+            android:transitionName="@string/transition_feed_image"
             fresco:viewAspectRatio="1.33"
             fresco:roundedCornerRadius="1dp"
             fresco:roundTopLeft="true"
@@ -42,7 +41,8 @@
                 android:layout_height="wrap_content"
                 android:text="@string/feed_tmp"
                 android:textStyle="bold"
-                android:textSize="15sp"/>
+                android:textSize="15sp"
+                android:transitionName="@string/transition_feed_title"/>
 
             <TextView
                 android:id="@+id/feed_desc"
@@ -58,9 +58,11 @@
                 android:orientation="horizontal">
 
                 <ImageView
+                    android:id="@+id/feed_date"
                     android:layout_width="15dp"
                     android:layout_height="15dp"
-                    android:background="@drawable/feed_time"/>
+                    android:background="@drawable/feed_time"
+                    android:transitionName="@string/transition_feed_date"/>
 
                 <TextView
                     android:id="@+id/feed_time"
@@ -70,7 +72,8 @@
                     android:layout_marginLeft="5dp"
                     android:text="@string/feed_time"
                     android:textSize="12sp"
-                    android:textColor="@color/feed_time"/>
+                    android:textColor="@color/feed_time"
+                    android:transitionName="@string/transition_feed_date2"/>
 
             </LinearLayout>
 
