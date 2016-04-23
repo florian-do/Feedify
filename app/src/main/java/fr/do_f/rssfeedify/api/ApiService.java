@@ -8,6 +8,7 @@ import fr.do_f.rssfeedify.api.json.login.LoginResponse.LoginPost;
 import fr.do_f.rssfeedify.api.json.login.RegisterResponse;
 import fr.do_f.rssfeedify.api.json.login.RegisterResponse.RegisterPost;
 import fr.do_f.rssfeedify.api.json.menu.GetFeedResponse;
+import fr.do_f.rssfeedify.api.json.users.UsersReponse;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
@@ -36,4 +37,9 @@ public interface ApiService {
 
     @GET("feed/{feedid}/articles/{page}")
     Call<FeedResponse>      getAllFeedById(@Path("feedid") int id, @Path("page") int page);
+
+    // USERS
+
+    @GET("users")
+    Call<UsersReponse>      getAllUser();
 }

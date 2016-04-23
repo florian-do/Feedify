@@ -2,6 +2,7 @@ package fr.do_f.rssfeedify.main.feed.adapter;
 
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
+import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -38,9 +39,8 @@ public class FeedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         void onItemClick(Articles articles, View v);
     }
 
-    public FeedAdapter(List<Articles> articles) {
-        this.articles = articles;
-        setImage();
+    public FeedAdapter() {
+
     }
 
     @Override
@@ -58,13 +58,18 @@ public class FeedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     @Override
     public int getItemCount() {
-        return articles.size();
+        int size = (articles == null) ? 0 : articles.size();
+        return size;
     }
 
     public synchronized void refreshAdapter(List<Articles> newArticles, boolean wipedata) {
-        if (wipedata)
-            this.articles.clear();
-        this.articles.addAll(newArticles);
+        if (articles != null) {
+            if (wipedata)
+                articles.clear();
+            articles.addAll(newArticles);
+        } else {
+            articles = newArticles;
+        }
         setImage();
         notifyDataSetChanged();
     }
@@ -93,6 +98,9 @@ public class FeedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         @Bind(R.id.feed_title)
         TextView            title;
 
+        @Bind(R.id.feed_desc)
+        TextView            preview;
+
         @Bind(R.id.feed_image)
         SimpleDraweeView    image;
 
@@ -113,6 +121,8 @@ public class FeedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             } else {
                 image.setVisibility(View.GONE);
             }
+
+            preview.setText(Html.fromHtml(articles.getPreview().substring(0, 100))+"...");
 
             title.setText(articles.getTitle());
             v.setOnClickListener(new View.OnClickListener() {

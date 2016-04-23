@@ -91,13 +91,10 @@
                     fresco:roundBottomLeft="true"
                     fresco:roundBottomRight="true"/>
 
-
                 <TextView
                     android:id="@+id/feed_details_content"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/feed_details_tmp"
-                    />
+                    android:layout_height="wrap_content" />
 
             </LinearLayout>
 

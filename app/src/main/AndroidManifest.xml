@@ -3,6 +3,7 @@
     package="fr.do_f.rssfeedify">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:name=".MyApplication"
@@ -32,7 +33,13 @@
         <activity
             android:name=".main.feed.activity.DetailsActivity"
             android:label="@string/title_activity_details"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".main.settings.activity.SettingsActivity" />
+        <activity
+            android:name=".main.settings.activity.AdminActivity"
+            android:theme="@style/AppTheme.TransparentActivity" />
+        <activity android:name=".main.settings.activity.AddUserActivity"
+            android:theme="@style/AppTheme.TransparentActivity"/>
     </application>
 
 </manifest>

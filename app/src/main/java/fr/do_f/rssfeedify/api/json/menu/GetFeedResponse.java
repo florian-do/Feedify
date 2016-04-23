@@ -2,6 +2,7 @@ package fr.do_f.rssfeedify.api.json.menu;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -31,7 +32,7 @@ public class GetFeedResponse {
         this.feed = feed;
     }
 
-    public static class Feed {
+    public static class Feed implements Serializable {
         private int id;
         private String name;
         private String url;

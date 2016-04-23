@@ -13,6 +13,8 @@ import java.util.List;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import fr.do_f.rssfeedify.R;
+import fr.do_f.rssfeedify.Utils;
+import fr.do_f.rssfeedify.api.json.feeds.FeedResponse;
 import fr.do_f.rssfeedify.api.json.menu.GetFeedResponse;
 import fr.do_f.rssfeedify.api.json.menu.GetFeedResponse.*;
 
@@ -26,8 +28,8 @@ public class MenuAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private onItemClickListener onItemClickListener;
     private List<Feed>          feed;
 
-    public MenuAdapter(List<Feed> feed) {
-        this.feed = feed;
+    public MenuAdapter() {
+
     }
 
     @Override
@@ -39,12 +41,23 @@ public class MenuAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        ((CellMenuViewHolder) holder).bindView(feed.get(position));
+        ((CellMenuViewHolder) holder).bindView(feed.get(position), position);
     }
 
     @Override
     public int getItemCount() {
-        return feed.size();
+        int size = (feed == null) ? 0 : feed.size();
+        return size;
+    }
+
+    public synchronized void refreshAdapter(List<Feed> newFeed) {
+        if (feed != null) {
+            feed.clear();
+            feed.addAll(newFeed);
+        } else {
+            feed = newFeed;
+        }
+        notifyDataSetChanged();
     }
 
     public void setOnItemClickListener(onItemClickListener listener) {
@@ -52,7 +65,7 @@ public class MenuAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     public interface onItemClickListener {
-        void onItemClick(int feedid);
+        void onItemClick(int position);
     }
 
     class CellMenuViewHolder extends RecyclerView.ViewHolder {
@@ -70,34 +83,6 @@ public class MenuAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         private Boolean alreadySet;
 
-        private int[] colors = {
-                R.color.md_red_500,
-                R.color.md_red_A200,
-                R.color.md_pink_500,
-                R.color.md_pink_A200,
-                R.color.md_purple_500,
-                R.color.md_deep_purple_500,
-                R.color.md_deep_purple_A200,
-                R.color.md_indigo_500,
-                R.color.md_indigo_A200,
-                R.color.md_blue_500,
-                R.color.md_blue_A200,
-                R.color.md_light_blue_500,
-                R.color.md_light_blue_A200,
-                R.color.md_cyan_500,
-                R.color.md_teal_500,
-                R.color.md_green_500,
-                R.color.md_green_A200,
-                R.color.md_light_green_500,
-                R.color.md_lime_500,
-                R.color.md_amber_500,
-                R.color.md_amber_A200,
-                R.color.md_orange_500,
-                R.color.md_orange_A200,
-                R.color.md_deep_orange_500,
-                R.color.md_deep_orange_A200
-        };
-
         public CellMenuViewHolder(View v) {
             super(v);
             this.alreadySet = false;
@@ -105,10 +90,10 @@ public class MenuAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             this.v = v;
         }
 
-        public void bindView(final Feed feed) {
+        public void bindView(final Feed feed, final int position) {
             if (!alreadySet) {
                 GradientDrawable bgShape = (GradientDrawable)circle.getBackground();
-                bgShape.setColor(v.getResources().getColor(colors[random(0, colors.length-1)]));
+                bgShape.setColor(v.getResources().getColor(Utils.colors[random(0, Utils.colors.length-1)]));
                 alreadySet = true;
             }
             circle_text.setText(feed.getName().substring(0, 1));
@@ -118,7 +103,7 @@ public class MenuAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 @Override
                 public void onClick(View v) {
                     if (onItemClickListener != null)
-                        onItemClickListener.onItemClick(feed.getId());
+                        onItemClickListener.onItemClick(position);
                 }
             });
         }

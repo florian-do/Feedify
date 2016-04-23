@@ -27,6 +27,7 @@ public class FeedResponse {
         private String link;
         private String title;
         private String full;
+        private String preview;
 
         @SerializedName("feed_id")
         private int feedId;
@@ -89,6 +90,14 @@ public class FeedResponse {
 
         public void setFeedId(int feed_id) {
             this.feedId = feed_id;
+        }
+
+        public String getPreview() {
+            return preview;
+        }
+
+        public void setPreview(String preview) {
+            this.preview = preview;
         }
     }
 }

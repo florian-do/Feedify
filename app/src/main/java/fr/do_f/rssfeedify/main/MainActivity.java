@@ -4,7 +4,9 @@ import android.app.Activity;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.ColorStateList;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -20,6 +22,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.LinearLayout;
 
+import com.google.gson.reflect.TypeToken;
+
+import java.lang.reflect.Type;
 import java.util.List;
 
 import butterknife.Bind;
@@ -30,17 +35,20 @@ import fr.do_f.rssfeedify.Utils;
 import fr.do_f.rssfeedify.api.RestClient;
 import fr.do_f.rssfeedify.api.json.menu.GetFeedResponse;
 import fr.do_f.rssfeedify.api.json.menu.GetFeedResponse.*;
+import fr.do_f.rssfeedify.broadcast.NetworkReceiver;
 import fr.do_f.rssfeedify.main.feed.fragment.FeedFragment;
 import fr.do_f.rssfeedify.main.feed.activity.AddFeedActivity;
 import fr.do_f.rssfeedify.main.menu.adapter.MenuAdapter;
 
+import fr.do_f.rssfeedify.main.settings.activity.AdminActivity;
+import fr.do_f.rssfeedify.main.settings.activity.SettingsActivity;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
-        MenuAdapter.onItemClickListener {
+        MenuAdapter.onItemClickListener, NetworkReceiver.onNetworkStateChanged {
 
     private static final String     TAG = "MainActivity";
 
@@ -53,7 +61,15 @@ public class MainActivity extends AppCompatActivity
     @Bind(R.id.menu_home)
     LinearLayout            home;
 
+    @Bind(R.id.toolbar)
+    Toolbar                 toolbar;
+
     private String          token;
+    private List<Feed>      feedInfo;
+    private NetworkReceiver network;
+    private MenuAdapter     adapter;
+    private int             networkState;
+
 
     public static void newActivity(Activity activity)
     {
@@ -67,7 +83,6 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         token = getSharedPreferences(Utils.SP, Context.MODE_PRIVATE).getString(Utils.TOKEN, "null");
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         fab.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.ganjify)));
@@ -81,41 +96,70 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+        IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+        network = new NetworkReceiver();
+        this.registerReceiver(network, filter);
+
+
+        network = new NetworkReceiver();
+        network.setOnNetworkStateChanged(this);
+        networkState = network.singleCheck(this);
+
         initFeed();
 
         FragmentManager fm = getFragmentManager();
         fm.beginTransaction()
-                .replace(R.id.container, FeedFragment.newInstance(Utils.HOME, 0))
+                .replace(R.id.container, FeedFragment.newInstance(Utils.HOME, null))
                 .addToBackStack(null)
                 .commit();
     }
 
+    // init Drawer Menu List
     public void initFeed() {
-        Call<GetFeedResponse> call = RestClient.get(token).getFeed();
-        call.enqueue(new Callback<GetFeedResponse>() {
-            @Override
-            public void onResponse(Call<GetFeedResponse> call, Response<GetFeedResponse> response) {
-                if (response.body() != null)
-                    setupFeed(response.body().getFeed());
-                else
-                    Log.d(TAG, "error 500");
-
+        setupFeed();
+        if (networkState == NetworkReceiver.STATE_OFF)
+        {
+            Type listType = new TypeToken<List<Feed>>() {}.getType();
+            feedInfo = Utils.read(this, Utils.FILE_MENU, listType);
+            Log.d(TAG, "INIT MENU NETWORK OFF");
+            if (feedInfo == null) {
+                //Snackbar.make(getView(), "Error, can't retreive the feed", Snackbar.LENGTH_SHORT).show();
+                return ;
+            } else {
+                adapter.refreshAdapter(feedInfo);
             }
+        }
+        else
+        {
+            Call<GetFeedResponse> call = RestClient.get(token).getFeed();
+            call.enqueue(new Callback<GetFeedResponse>() {
+                @Override
+                public void onResponse(Call<GetFeedResponse> call, Response<GetFeedResponse> response) {
+                    if (response.body() != null) {
+                        feedInfo = response.body().getFeed();
+                        Utils.write(getApplicationContext(), feedInfo, Utils.FILE_MENU);
+                        adapter.refreshAdapter(response.body().getFeed());
+                    }
+                    else {
+                        Log.d(TAG, "error 500");
+                    }
+                }
 
-            @Override
-            public void onFailure(Call<GetFeedResponse> call, Throwable t) {
-                Log.d(TAG, "onFailure : "+t.getMessage());
-            }
-        });
+                @Override
+                public void onFailure(Call<GetFeedResponse> call, Throwable t) {
+                    Log.d(TAG, "onFailure : "+t.getMessage());
+                }
+            });
+        }
     }
 
-    public void setupFeed(List<Feed> feed) {
+    public void setupFeed() {
         LinearLayoutManager lm = new LinearLayoutManager(this);
-        this.feed.setLayoutManager(lm);
-        this.feed.setHasFixedSize(true);
-        MenuAdapter adapter = new MenuAdapter(feed);
+        feed.setLayoutManager(lm);
+        feed.setHasFixedSize(true);
+        adapter = new MenuAdapter();
         adapter.setOnItemClickListener(this);
-        this.feed.setAdapter(adapter);
+        feed.setAdapter(adapter);
     }
 
     @Override
@@ -127,6 +171,62 @@ public class MainActivity extends AppCompatActivity
             super.onBackPressed();
         }
     }
+
+    @OnClick(R.id.fab)
+    public void onFabClick()
+    {
+        int[] startingLocation = new int[2];
+        fab.getLocationOnScreen(startingLocation);
+        startingLocation[0] += fab.getWidth() / 2;
+        AddFeedActivity.newActivity(startingLocation, this);
+        overridePendingTransition(0, 0);
+    }
+
+
+    // On Drawer Menu Item Click
+    @Override
+    public void onItemClick(int position) {
+        FragmentManager fm = getFragmentManager();
+        fm.beginTransaction()
+                .replace(R.id.container, FeedFragment.newInstance(Utils.FEEDBYID, feedInfo.get(position)))
+                .addToBackStack(null)
+                .commit();
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+    }
+
+    @OnClick(R.id.menu_home)
+    public void onClickHome() {
+        FragmentManager fm = getFragmentManager();
+        fm.beginTransaction()
+                .replace(R.id.container, FeedFragment.newInstance(Utils.HOME, null))
+                .addToBackStack(null)
+                .commit();
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+    }
+
+    // do_f Interface on Network Change
+    @Override
+    public void onStateChange(int state) {
+        if (state == NetworkReceiver.STATE_ON) {
+            //onRefresh();
+            networkState = state;
+        } else {
+            networkState = state;
+        }
+    }
+
+
+
+
+
+
+    // USELESS
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -144,6 +244,13 @@ public class MainActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+//            Intent i = new Intent(this, SettingsActivity.class);
+//            startActivity(i);
+            int[] startingLocation = new int[2];
+            toolbar.getLocationOnScreen(startingLocation);
+            startingLocation[0] += toolbar.getWidth() / 2;
+            AdminActivity.newActivity(startingLocation, this);
+            overridePendingTransition(0, 0);
             return true;
         }
 
@@ -173,39 +280,5 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
-    }
-
-    @OnClick(R.id.fab)
-    public void onFabClick()
-    {
-        int[] startingLocation = new int[2];
-        fab.getLocationOnScreen(startingLocation);
-        startingLocation[0] += fab.getWidth() / 2;
-        AddFeedActivity.newActivity(startingLocation, this);
-        overridePendingTransition(0, 0);
-    }
-
-    @Override
-    public void onItemClick(int feedid) {
-        FragmentManager fm = getFragmentManager();
-        fm.beginTransaction()
-                .replace(R.id.container, FeedFragment.newInstance(Utils.FEEDBYID, feedid))
-                .addToBackStack(null)
-                .commit();
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
-    }
-
-    @OnClick(R.id.menu_home)
-    public void onClickHome() {
-        FragmentManager fm = getFragmentManager();
-        fm.beginTransaction()
-                .replace(R.id.container, FeedFragment.newInstance(Utils.HOME, 0))
-                .addToBackStack(null)
-                .commit();
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
     }
 }

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">RSS Feedify</string>
+    <string name="app_name">Feedify</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
@@ -48,6 +48,8 @@
 
     <string name="feed_details_tmp">If the LG G5 was just another Android rectangle, I could end this review right now with the words “buy the Galaxy S7 Edge.” LG’s riposte to Samsung is, however, more ambitious than a single phone. The G5’s intrigue stems from a set of extra accessories that plug directly into its bottom, augmenting its battery life, camera controls, and audio performance. Think of it as a Game Boy with functionality cartridges, if you will. Modularity holds out the promise of greater versatility than a regular smartphone, and it also offers a route to upgrading and improving the G5 long after its initial purchase. In a market full of mostly cosmetic or battery-enhancing accessories, a phone that can truly be augmented with plug-in extras stands out as a...</string>
 
+    <string name="feed_section_offline">Dispo hors ligne</string>
+
     <!-- Add Feed -->
     <string name="feed_add_text">Ajouter un feed</string>
     <string name="feed_add_button">Ajouter</string>
@@ -60,5 +62,15 @@
     <string name="transition_feed_image">transition:IMAGE</string>
     <string name="transition_feed_date">transition:DATE</string>
     <string name="transition_feed_date2">transition:DATE2</string>
+
+    <!-- Settings -->
+
+    <string name="admin_adduser_label">Ajouter un utilisateur</string>
+
+    <string name="pref_header_notifications">Notifications</string>
+    <string name="pref_header_general">General</string>
+
+    <string name="pref_title_offline_feed">Enable offline feed</string>
+    <string name="pref_description_offline_feed">With the offline feed option, you can access to your last feed totaly offline!</string>
 
 </resources>

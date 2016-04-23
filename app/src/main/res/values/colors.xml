@@ -9,6 +9,7 @@
     <color name="ganjify">#1bc184</color>
     <color name="feed_time">#999999</color>
     <color name="feed_add_separator">#e5e5e5</color>
+    <color name="white_material">#fafafa</color>
 
     <color name="login_title">#494949</color>
     <color name="login_text_button">#ffffff</color>
