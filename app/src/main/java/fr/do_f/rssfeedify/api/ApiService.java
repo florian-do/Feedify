@@ -8,11 +8,16 @@ import fr.do_f.rssfeedify.api.json.login.LoginResponse.LoginPost;
 import fr.do_f.rssfeedify.api.json.login.RegisterResponse;
 import fr.do_f.rssfeedify.api.json.login.RegisterResponse.RegisterPost;
 import fr.do_f.rssfeedify.api.json.menu.GetFeedResponse;
+import fr.do_f.rssfeedify.api.json.users.DeleteUserResponse;
+import fr.do_f.rssfeedify.api.json.users.UpdateUserResponse;
+import fr.do_f.rssfeedify.api.json.users.UpdateUserResponse.*;
 import fr.do_f.rssfeedify.api.json.users.UsersReponse;
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
+import retrofit2.http.PUT;
 import retrofit2.http.Path;
 
 /**
@@ -21,25 +26,31 @@ import retrofit2.http.Path;
 public interface ApiService {
 
     @POST("register")
-    Call<RegisterResponse>  register(@Body RegisterPost post);
+    Call<RegisterResponse>      register(@Body RegisterPost post);
 
     @POST("login")
-    Call<LoginResponse>     login(@Body LoginPost post);
+    Call<LoginResponse>         login(@Body LoginPost post);
 
     @POST("feed")
-    Call<AddFeedResponse>   addFeed(@Body AddFeedPost post);
+    Call<AddFeedResponse>       addFeed(@Body AddFeedPost post);
 
     @GET("feeds")
-    Call<GetFeedResponse>   getFeed();
+    Call<GetFeedResponse>       getFeed();
 
     @GET("feeds/articles/{id}")
-    Call<FeedResponse>      getAllFeed(@Path("id") int page);
+    Call<FeedResponse>          getAllFeed(@Path("id") int page);
 
     @GET("feed/{feedid}/articles/{page}")
-    Call<FeedResponse>      getAllFeedById(@Path("feedid") int id, @Path("page") int page);
+    Call<FeedResponse>          getAllFeedById(@Path("feedid") int id, @Path("page") int page);
 
     // USERS
 
     @GET("users")
-    Call<UsersReponse>      getAllUser();
+    Call<UsersReponse>          getAllUser();
+
+    @DELETE("user/{username}")
+    Call<DeleteUserResponse>    deleteUser(@Path("username") String username);
+
+    @PUT("user/{username}")
+    Call<UpdateUserResponse>    updateUser(@Path("username") String username, @Body User user);
 }

@@ -18,9 +18,10 @@ public class UsersReponse {
     }
 
     public static class User {
-        private int id;
-        private String username;
-        private String type;
+        private int     id;
+        private String  username;
+        private String  type;
+        private int     color;
 
         public int getId() {
             return id;
@@ -44,6 +45,14 @@ public class UsersReponse {
 
         public void setType(String type) {
             this.type = type;
+        }
+
+        public int getColor() {
+            return color;
+        }
+
+        public void setColor(int color) {
+            this.color = color;
         }
     }
 }

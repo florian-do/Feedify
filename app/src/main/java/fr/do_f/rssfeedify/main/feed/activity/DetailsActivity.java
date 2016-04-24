@@ -93,7 +93,9 @@ public class DetailsActivity extends AppCompatActivity implements Html.ImageGett
     public Drawable getDrawable(String source) {
         Log.d(TAG, "getDrawable : "+source);
         Drawable d = getResources().getDrawable(R.drawable.drawable_background_box);
-        d.setBounds(0, 0, 0, 0);
+        if (d != null) {
+            d.setBounds(0, 0, 0, 0);
+        }
         return d;
     }
 }

@@ -38,8 +38,11 @@
         <activity
             android:name=".main.settings.activity.AdminActivity"
             android:theme="@style/AppTheme.TransparentActivity" />
-        <activity android:name=".main.settings.activity.AddUserActivity"
-            android:theme="@style/AppTheme.TransparentActivity"/>
+        <activity
+            android:name=".main.settings.activity.AddUserActivity"
+            android:theme="@style/AppTheme.TransparentActivity" />
+        <activity android:name=".main.settings.activity.DetailsUserActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
     </application>
 
 </manifest>

@@ -2,6 +2,7 @@ package fr.do_f.rssfeedify.main.settings.adapter;
 
 import android.content.Context;
 import android.graphics.drawable.GradientDrawable;
+import android.support.design.widget.Snackbar;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,7 +20,12 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import fr.do_f.rssfeedify.R;
 import fr.do_f.rssfeedify.Utils;
+import fr.do_f.rssfeedify.api.RestClient;
+import fr.do_f.rssfeedify.api.json.users.DeleteUserResponse;
 import fr.do_f.rssfeedify.api.json.users.UsersReponse.*;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * Created by do_f on 23/04/16.
@@ -28,18 +34,25 @@ public class AdminAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
     private static final String TAG = "AdminAdapter";
 
-    private setOnClickListener  setOnClickListener;
-    private int                 lastPosition = -1;
-    private List<User>          users;
-    private Context             context;
+    private onActivictyInteraction  onActivictyInteraction;
+    private int                     lastPosition = -1;
+    private List<User>              users;
+    private Context                 context;
+    private View                    v;
+    private View                    rootView;
+    private String                  token;
 
-    public AdminAdapter(Context context) {
+    public AdminAdapter(Context context, View rootView) {
         this.context = context;
+        this.rootView = rootView;
+        token = context
+                .getSharedPreferences(Utils.SP, Context.MODE_PRIVATE)
+                .getString(Utils.TOKEN, "null");
     }
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View v = LayoutInflater
+        v = LayoutInflater
                 .from(parent.getContext())
                 .inflate(R.layout.main_settings_adapter_admin, parent, false);
         return new CellAdminViewHolder(v);
@@ -62,6 +75,48 @@ public class AdminAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         return size;
     }
 
+    public void onItemDismiss(final int position) {
+        Snackbar snackbar = Snackbar
+                .make(rootView, "Do you want to delete this user ?", Snackbar.LENGTH_LONG)
+                .setAction("NO", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        notifyDataSetChanged();
+                    }
+                });
+
+        snackbar.show();
+        snackbar.setCallback(new Snackbar.Callback() {
+            @Override
+            public void onDismissed(final Snackbar snackbar, int event) {
+                super.onDismissed(snackbar, event);
+                if (event == DISMISS_EVENT_TIMEOUT) {
+                    Call<DeleteUserResponse> call = RestClient.get(token).deleteUser(users.get(position).getUsername());
+                    call.enqueue(new Callback<DeleteUserResponse>() {
+                        @Override
+                        public void onResponse(Call<DeleteUserResponse> call, Response<DeleteUserResponse> response) {
+                            if (response.body() != null) {
+                                users.remove(position);
+                                notifyItemRemoved(position);
+                            } else {
+                                Log.d(TAG, "response == null : "+response.code());
+                                snackbar.dismiss();
+                                notifyDataSetChanged();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<DeleteUserResponse> call, Throwable t) {
+                            Log.d(TAG, "onFailure : "+t.getMessage());
+                            snackbar.dismiss();
+                            notifyDataSetChanged();
+                        }
+                    });
+                }
+            }
+        });
+    }
+
     public synchronized void refreshAdapter(List<User> newUsers) {
         if (users != null) {
             users.clear();
@@ -69,6 +124,7 @@ public class AdminAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         } else {
             users = newUsers;
         }
+        setColor();
         notifyDataSetChanged();
     }
 
@@ -83,12 +139,26 @@ public class AdminAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         }
     }
 
-    public void setSetOnClickListener(setOnClickListener setOnClickListener) {
-        this.setOnClickListener = setOnClickListener;
+    private void setColor() {
+        for (User u : users) {
+            if (u.getColor() == 0) {
+                u.setColor(Utils.colors[random(0, Utils.colors.length - 1)]);
+            }
+        }
     }
 
-    public interface setOnClickListener {
-        void onUserClick();
+    private int random(int min, int max)
+    {
+        int range = (max - min) + 1;
+        return (int)(Math.random() * range) + min;
+    }
+
+    public interface onActivictyInteraction {
+        void onUserClick(User user);
+    }
+
+    public void setOnActivictyInteraction(AdminAdapter.onActivictyInteraction onActivictyInteraction) {
+        this.onActivictyInteraction = onActivictyInteraction;
     }
 
     public class CellAdminViewHolder extends RecyclerView.ViewHolder {
@@ -107,35 +177,28 @@ public class AdminAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
         private View v;
 
-        private Boolean alreadySet;
-
         public CellAdminViewHolder(View view) {
             super(view);
             ButterKnife.bind(this, view);
-            alreadySet = false;
             v = view;
         }
 
         public void bindView(final User user, final int position) {
-            if (!alreadySet) {
-                GradientDrawable bgShape = (GradientDrawable)circle.getBackground();
-                bgShape.setColor(v.getResources().getColor(Utils.colors[random(0, Utils.colors.length-1)]));
-                alreadySet = true;
-            }
+            GradientDrawable bgShape = (GradientDrawable)circle.getBackground();
+            bgShape.setColor(v.getResources().getColor(user.getColor()));
             circle_text.setText(user.getUsername().substring(0, 1).toUpperCase());
             title.setText(user.getUsername());
 
-//            v.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View v) {
-//                    if (onItemClickListener != null)
-//                        onItemClickListener.onItemClick(position);
-//                }
-//            });
+            v.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (onActivictyInteraction != null)
+                        onActivictyInteraction.onUserClick(user);
+                }
+            });
         }
 
-        public int random(int min, int max)
-        {
+        public int random(int min, int max) {
             int range = (max - min) + 1;
             return (int)(Math.random() * range) + min;
         }

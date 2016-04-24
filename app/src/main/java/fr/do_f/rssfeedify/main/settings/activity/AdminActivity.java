@@ -12,6 +12,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
+import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -24,6 +25,7 @@ import butterknife.OnClick;
 import fr.do_f.rssfeedify.R;
 import fr.do_f.rssfeedify.Utils;
 import fr.do_f.rssfeedify.api.RestClient;
+import fr.do_f.rssfeedify.api.json.users.DeleteUserResponse;
 import fr.do_f.rssfeedify.api.json.users.UsersReponse;
 import fr.do_f.rssfeedify.main.settings.adapter.AdminAdapter;
 import fr.do_f.rssfeedify.main.settings.callback.RecyclerViewSwipedCallback;
@@ -34,7 +36,7 @@ import retrofit2.Response;
 
 public class AdminActivity extends AppCompatActivity
         implements RevealBackgroundView.onStateChangeListener,
-        AdminAdapter.setOnClickListener {
+        AdminAdapter.onActivictyInteraction {
 
 
     private static final Interpolator   DECELERATE_INTERPOLATOR = new DecelerateInterpolator();
@@ -56,6 +58,7 @@ public class AdminActivity extends AppCompatActivity
 
     private AdminAdapter    adapter;
     private String          token;
+    private View            view;
 
     public static void newActivity(int[] startingLocation, Activity activity) {
         Intent i = new Intent(activity, AdminActivity.class);
@@ -68,6 +71,7 @@ public class AdminActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_settings_activity_admin);
         ButterKnife.bind(this);
+        view = findViewById(android.R.id.content);
 
         setSupportActionBar(toolbar);
         fab.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.ganjify)));
@@ -111,8 +115,8 @@ public class AdminActivity extends AppCompatActivity
         LinearLayoutManager lm = new LinearLayoutManager(this);
         rvFeed.setHasFixedSize(true);
         rvFeed.setLayoutManager(lm);
-        adapter = new AdminAdapter(this);
-        adapter.setSetOnClickListener(this);
+        adapter = new AdminAdapter(this, view);
+        adapter.setOnActivictyInteraction(this);
         rvFeed.setAdapter(adapter);
 
         ItemTouchHelper.Callback callback =
@@ -141,7 +145,7 @@ public class AdminActivity extends AppCompatActivity
     }
 
     @Override
-    public void onUserClick() {
+    public void onUserClick(UsersReponse.User user) {
 
     }
 
