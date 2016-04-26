@@ -79,6 +79,9 @@ public class MenuAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         @Bind(R.id.menu_title)
         TextView            title;
 
+        @Bind(R.id.menu_news)
+        TextView            news;
+
         private View v;
 
         private Boolean alreadySet;
@@ -96,6 +99,7 @@ public class MenuAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 bgShape.setColor(v.getResources().getColor(Utils.colors[random(0, Utils.colors.length-1)]));
                 alreadySet = true;
             }
+            news.setText(String.valueOf(feed.getNewArticles()));
             circle_text.setText(feed.getName().substring(0, 1));
             title.setText(feed.getName());
 

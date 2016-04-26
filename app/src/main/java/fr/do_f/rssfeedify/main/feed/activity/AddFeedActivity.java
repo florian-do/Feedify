@@ -59,7 +59,7 @@ public class AddFeedActivity extends AppCompatActivity
     public static void newActivity(int[] startingLocation, Activity activity) {
         Intent i = new Intent(activity, AddFeedActivity.class);
         i.putExtra(ARG_LOC, startingLocation);
-        activity.startActivity(i);
+        activity.startActivityForResult(i, Utils.REQUEST_CODE);
     }
 
     @Override
@@ -118,6 +118,7 @@ public class AddFeedActivity extends AppCompatActivity
                 if (response.body() == null) {
                     showContent();
                 } else {
+                    setResult(RESULT_OK, null);
                     finish();
                 }
             }

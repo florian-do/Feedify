@@ -3,6 +3,7 @@ package fr.do_f.rssfeedify.api;
 import fr.do_f.rssfeedify.api.json.feeds.AddFeedResponse;
 import fr.do_f.rssfeedify.api.json.feeds.AddFeedResponse.AddFeedPost;
 import fr.do_f.rssfeedify.api.json.feeds.FeedResponse;
+import fr.do_f.rssfeedify.api.json.feeds.article.ReadArticleResponse;
 import fr.do_f.rssfeedify.api.json.login.LoginResponse;
 import fr.do_f.rssfeedify.api.json.login.LoginResponse.LoginPost;
 import fr.do_f.rssfeedify.api.json.login.RegisterResponse;
@@ -53,4 +54,9 @@ public interface ApiService {
 
     @PUT("user/{username}")
     Call<UpdateUserResponse>    updateUser(@Path("username") String username, @Body User user);
+
+    // ARTICLE
+
+    @POST("article/as_read/{id}")
+    Call<ReadArticleResponse>   readArticle(@Path("id") int id);
 }

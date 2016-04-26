@@ -74,6 +74,15 @@ public class AdminActivity extends AppCompatActivity
         view = findViewById(android.R.id.content);
 
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
+            }
+        });
+
         fab.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.ganjify)));
 
         token = getSharedPreferences(Utils.SP, Context.MODE_PRIVATE)

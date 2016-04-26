@@ -104,6 +104,12 @@ public class FeedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         @Bind(R.id.feed_image)
         SimpleDraweeView    image;
 
+        @Bind(R.id.feed_read)
+        TextView            read;
+
+        @Bind(R.id.feed_link)
+        TextView            link;
+
         private View v;
 
         public CellFeedViewHolder(View view) {
@@ -122,14 +128,23 @@ public class FeedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 image.setVisibility(View.GONE);
             }
 
+            if (articles.getStatus().equals("read")) {
+                read.setVisibility(View.GONE);
+            } else {
+                read.setVisibility(View.VISIBLE);
+            }
+
+            link.setText(articles.getLink().substring(0, 30)+"...");
             preview.setText(Html.fromHtml(articles.getPreview().substring(0, 100))+"...");
 
             title.setText(articles.getTitle());
             v.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (onItemClickListener != null)
+                    if (onItemClickListener != null) {
                         onItemClickListener.onItemClick(articles, v);
+                        read.setVisibility(View.GONE);
+                    }
                 }
             });
         }

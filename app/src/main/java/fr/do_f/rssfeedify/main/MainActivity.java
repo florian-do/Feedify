@@ -114,6 +114,14 @@ public class MainActivity extends AppCompatActivity
                 .commit();
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        //super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == Utils.REQUEST_CODE && resultCode == RESULT_OK) {
+            refreshRecycler();
+        }
+    }
+
     // init Drawer Menu List
     public void initFeed() {
         setupFeed();
@@ -129,27 +137,8 @@ public class MainActivity extends AppCompatActivity
                 adapter.refreshAdapter(feedInfo);
             }
         }
-        else
-        {
-            Call<GetFeedResponse> call = RestClient.get(token).getFeed();
-            call.enqueue(new Callback<GetFeedResponse>() {
-                @Override
-                public void onResponse(Call<GetFeedResponse> call, Response<GetFeedResponse> response) {
-                    if (response.body() != null) {
-                        feedInfo = response.body().getFeed();
-                        Utils.write(getApplicationContext(), feedInfo, Utils.FILE_MENU);
-                        adapter.refreshAdapter(response.body().getFeed());
-                    }
-                    else {
-                        Log.d(TAG, "error 500");
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<GetFeedResponse> call, Throwable t) {
-                    Log.d(TAG, "onFailure : "+t.getMessage());
-                }
-            });
+        else {
+            refreshRecycler();
         }
     }
 
@@ -160,6 +149,28 @@ public class MainActivity extends AppCompatActivity
         adapter = new MenuAdapter();
         adapter.setOnItemClickListener(this);
         feed.setAdapter(adapter);
+    }
+
+    public void refreshRecycler() {
+        Call<GetFeedResponse> call = RestClient.get(token).getFeed();
+        call.enqueue(new Callback<GetFeedResponse>() {
+            @Override
+            public void onResponse(Call<GetFeedResponse> call, Response<GetFeedResponse> response) {
+                if (response.body() != null) {
+                    feedInfo = response.body().getFeed();
+                    Utils.write(getApplicationContext(), feedInfo, Utils.FILE_MENU);
+                    adapter.refreshAdapter(response.body().getFeed());
+                }
+                else {
+                    Log.d(TAG, "error 500");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<GetFeedResponse> call, Throwable t) {
+                Log.d(TAG, "onFailure : "+t.getMessage());
+            }
+        });
     }
 
     @Override

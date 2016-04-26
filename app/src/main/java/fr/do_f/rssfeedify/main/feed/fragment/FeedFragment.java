@@ -24,6 +24,7 @@ import fr.do_f.rssfeedify.Utils;
 import fr.do_f.rssfeedify.api.RestClient;
 import fr.do_f.rssfeedify.api.json.feeds.FeedResponse;
 import fr.do_f.rssfeedify.api.json.feeds.FeedResponse.*;
+import fr.do_f.rssfeedify.api.json.feeds.article.ReadArticleResponse;
 import fr.do_f.rssfeedify.api.json.menu.GetFeedResponse.*;
 import fr.do_f.rssfeedify.broadcast.NetworkReceiver;
 import fr.do_f.rssfeedify.main.feed.activity.DetailsActivity;
@@ -256,7 +257,29 @@ public class FeedFragment extends Fragment
     // do_f Interface Recycler View onClick
     @Override
     public void onItemClick(Articles articles, View v) {
+        //markArticleAsRead(articles);
         DetailsActivity.newActivity(getActivity(), v, articles);
+    }
+
+
+    private void markArticleAsRead(Articles articles) {
+        Call<ReadArticleResponse> call = RestClient.get(token).readArticle(articles.getId());
+        call.enqueue(new Callback<ReadArticleResponse>() {
+            @Override
+            public void onResponse(Call<ReadArticleResponse> call, Response<ReadArticleResponse> response) {
+                if (response.body() != null) {
+                    Log.d(TAG, "SUCCESS");
+                } else {
+                    Log.d(TAG, "PASSCCESS + "+response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ReadArticleResponse> call, Throwable t) {
+                Log.d(TAG, "onFailure : "+t.getMessage());
+            }
+        });
+
     }
 
     // do_f Interface Switch Section Adapter

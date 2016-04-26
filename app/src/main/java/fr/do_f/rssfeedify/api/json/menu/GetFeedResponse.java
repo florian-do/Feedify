@@ -10,19 +10,8 @@ import java.util.List;
  */
 public class GetFeedResponse {
 
-    @SerializedName("new_articles")
-    private int newArticles;
-
     @SerializedName("feeds")
     private List<Feed> feed;
-
-    public int getNewArticles() {
-        return newArticles;
-    }
-
-    public void setNewArticles(int newArticles) {
-        this.newArticles = newArticles;
-    }
 
     public List<Feed> getFeed() {
         return feed;
@@ -33,11 +22,15 @@ public class GetFeedResponse {
     }
 
     public static class Feed implements Serializable {
+
         private int id;
         private String name;
         private String url;
         @SerializedName("refresh_error")
         private boolean refreshError;
+
+        @SerializedName("new_articles")
+        private int newArticles;
 
         public int getId() {
             return id;
@@ -69,6 +62,14 @@ public class GetFeedResponse {
 
         public void setRefreshError(boolean refreshError) {
             this.refreshError = refreshError;
+        }
+
+        public int getNewArticles() {
+            return newArticles;
+        }
+
+        public void setNewArticles(int newArticles) {
+            this.newArticles = newArticles;
         }
     }
 }
