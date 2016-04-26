@@ -6,10 +6,12 @@ import fr.do_f.rssfeedify.api.json.feeds.FeedResponse;
 import fr.do_f.rssfeedify.api.json.feeds.article.ReadArticleResponse;
 import fr.do_f.rssfeedify.api.json.login.LoginResponse;
 import fr.do_f.rssfeedify.api.json.login.LoginResponse.LoginPost;
+import fr.do_f.rssfeedify.api.json.login.LogoutResponse;
 import fr.do_f.rssfeedify.api.json.login.RegisterResponse;
 import fr.do_f.rssfeedify.api.json.login.RegisterResponse.RegisterPost;
 import fr.do_f.rssfeedify.api.json.menu.GetFeedResponse;
 import fr.do_f.rssfeedify.api.json.users.DeleteUserResponse;
+import fr.do_f.rssfeedify.api.json.users.GetUserReponse;
 import fr.do_f.rssfeedify.api.json.users.UpdateUserResponse;
 import fr.do_f.rssfeedify.api.json.users.UpdateUserResponse.*;
 import fr.do_f.rssfeedify.api.json.users.UsersReponse;
@@ -32,6 +34,9 @@ public interface ApiService {
     @POST("login")
     Call<LoginResponse>         login(@Body LoginPost post);
 
+    @POST("logout")
+    Call<LogoutResponse>        logout();
+
     @POST("feed")
     Call<AddFeedResponse>       addFeed(@Body AddFeedPost post);
 
@@ -48,6 +53,9 @@ public interface ApiService {
 
     @GET("users")
     Call<UsersReponse>          getAllUser();
+
+    @GET("user/{username}")
+    Call<GetUserReponse>        getUser(@Path("username") String username);
 
     @DELETE("user/{username}")
     Call<DeleteUserResponse>    deleteUser(@Path("username") String username);

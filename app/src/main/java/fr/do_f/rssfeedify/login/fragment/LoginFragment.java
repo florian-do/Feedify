@@ -22,6 +22,7 @@ import fr.do_f.rssfeedify.Utils;
 import fr.do_f.rssfeedify.api.RestClient;
 import fr.do_f.rssfeedify.api.json.login.LoginResponse;
 import fr.do_f.rssfeedify.api.json.login.LoginResponse.*;
+import fr.do_f.rssfeedify.api.json.users.GetUserReponse;
 import fr.do_f.rssfeedify.main.MainActivity;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -91,6 +92,7 @@ public class LoginFragment extends Fragment {
                 } else {
                     SharedPreferences sp = getActivity().getSharedPreferences(Utils.SP, Context.MODE_PRIVATE);
                     sp.edit().putString(Utils.TOKEN, response.body().getToken()).apply();
+                    sp.edit().putString(Utils.USERNAME, username.getText().toString()).apply();
                     MainActivity.newActivity(getActivity());
                     getActivity().finish();
                 }

@@ -114,24 +114,23 @@ public class FeedFragment extends Fragment
         network = new NetworkReceiver();
         network.setOnNetworkStateChanged(this);
         networkState = network.singleCheck(getActivity());
+        setupFeed();
         initFeed();
     }
 
     // FIRST CALL FOR INIT FEED
     public void initFeed() {
 
-        if (mAdapter == null) {
-            Log.d(TAG, "mAdapter == null");
-        }
-        if (rvFeed == null) {
-            Log.d(TAG, "rvFeed == null");
-        }
-
-        if (rvFeed.getAdapter() == null) {
-            Log.d(TAG, "get Adapter == null");
-        }
-
-        setupFeed();
+//        if (mAdapter == null) {
+//            Log.d(TAG, "mAdapter == null");
+//        }
+//        if (rvFeed == null) {
+//            Log.d(TAG, "rvFeed == null");
+//        }
+//
+//        if (rvFeed.getAdapter() == null) {
+//            Log.d(TAG, "get Adapter == null");
+//        }
 
         if (networkState == NetworkReceiver.STATE_OFF)
         {
@@ -155,6 +154,8 @@ public class FeedFragment extends Fragment
                 call = RestClient.get(token).getAllFeedById(feed.getId(), 1);
             }
 
+            Log.d(TAG, "TOKEN : "+token);
+
             call.enqueue(new Callback<FeedResponse>() {
                 @Override
                 public void onResponse(Call<FeedResponse> call, Response<FeedResponse> response) {
@@ -165,12 +166,15 @@ public class FeedFragment extends Fragment
                         Utils.write(getActivity(), articles, fileName);
                         mAdapter.refreshAdapter(articles, true);
                         swipe.setRefreshing(false);
+                    } else {
+                        Log.d(TAG, "setupFeed FAIL : "+response.code());
+                        //initFeed();
                     }
                 }
 
                 @Override
                 public void onFailure(Call<FeedResponse> call, Throwable t) {
-                    Log.d(TAG, "onFailure");
+                    Log.d(TAG, "setupFeed onFailure : "+t.getMessage());
 
                 }
             });

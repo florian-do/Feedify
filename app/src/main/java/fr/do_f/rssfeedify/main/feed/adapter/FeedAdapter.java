@@ -135,7 +135,7 @@ public class FeedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             }
 
             link.setText(articles.getLink().substring(0, 30)+"...");
-            preview.setText(Html.fromHtml(articles.getPreview().substring(0, 100))+"...");
+            preview.setText(Html.fromHtml(articles.getPreview().substring(0, 100).replace("<p>", "")+"..."));
 
             title.setText(articles.getTitle());
             v.setOnClickListener(new View.OnClickListener() {

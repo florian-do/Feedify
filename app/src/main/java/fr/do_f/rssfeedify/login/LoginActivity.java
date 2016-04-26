@@ -1,7 +1,9 @@
 package fr.do_f.rssfeedify.login;
 
+import android.app.Activity;
 import android.app.FragmentManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 
@@ -22,6 +24,12 @@ public class LoginActivity extends AppCompatActivity
         implements MenuFragment.OnFragmentInteractionListener {
 
     private FragmentManager fm;
+
+    public static void newActivity(Activity activity)
+    {
+        Intent i = new Intent(activity, LoginActivity.class);
+        activity.startActivity(i);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -26,6 +26,8 @@ import fr.do_f.rssfeedify.R;
 import fr.do_f.rssfeedify.Utils;
 import fr.do_f.rssfeedify.api.RestClient;
 import fr.do_f.rssfeedify.api.json.users.DeleteUserResponse;
+import fr.do_f.rssfeedify.api.json.users.GetUserReponse;
+import fr.do_f.rssfeedify.api.json.users.UpdateUserResponse;
 import fr.do_f.rssfeedify.api.json.users.UsersReponse;
 import fr.do_f.rssfeedify.main.settings.adapter.AdminAdapter;
 import fr.do_f.rssfeedify.main.settings.callback.RecyclerViewSwipedCallback;
@@ -87,6 +89,7 @@ public class AdminActivity extends AppCompatActivity
 
         token = getSharedPreferences(Utils.SP, Context.MODE_PRIVATE)
                 .getString(Utils.TOKEN, "null");
+
         setupFeed();
         setupRevealBackground();
     }
@@ -155,7 +158,7 @@ public class AdminActivity extends AppCompatActivity
 
     @Override
     public void onUserClick(UsersReponse.User user) {
-
+        DetailsUserActivity.newActivity(user, true, this);
     }
 
     @OnClick(R.id.fab)

@@ -38,7 +38,8 @@ public class RestClient {
 
     public static ApiService get(String _token)
     {
-        if (token == null)
+        if (token == null
+                || !token.equals(_token))
             setupRestClientToken(_token);
         return mTokenRestClient;
     }

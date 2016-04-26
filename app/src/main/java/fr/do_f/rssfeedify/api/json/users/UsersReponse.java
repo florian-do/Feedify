@@ -1,5 +1,6 @@
 package fr.do_f.rssfeedify.api.json.users;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -17,11 +18,16 @@ public class UsersReponse {
         this.users = users;
     }
 
-    public static class User {
+    public static class User implements Serializable {
         private int     id;
         private String  username;
         private String  type;
         private int     color;
+
+        public User(String username, String type) {
+            this.username = username;
+            this.type = type;
+        }
 
         public int getId() {
             return id;

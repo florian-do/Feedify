@@ -5,11 +5,13 @@ import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -21,6 +23,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.google.gson.reflect.TypeToken;
 
@@ -33,18 +36,24 @@ import butterknife.OnClick;
 import fr.do_f.rssfeedify.R;
 import fr.do_f.rssfeedify.Utils;
 import fr.do_f.rssfeedify.api.RestClient;
+import fr.do_f.rssfeedify.api.json.login.LogoutResponse;
 import fr.do_f.rssfeedify.api.json.menu.GetFeedResponse;
 import fr.do_f.rssfeedify.api.json.menu.GetFeedResponse.*;
+import fr.do_f.rssfeedify.api.json.users.GetUserReponse;
+import fr.do_f.rssfeedify.api.json.users.UsersReponse;
 import fr.do_f.rssfeedify.broadcast.NetworkReceiver;
+import fr.do_f.rssfeedify.login.LoginActivity;
 import fr.do_f.rssfeedify.main.feed.fragment.FeedFragment;
 import fr.do_f.rssfeedify.main.feed.activity.AddFeedActivity;
 import fr.do_f.rssfeedify.main.menu.adapter.MenuAdapter;
 
 import fr.do_f.rssfeedify.main.settings.activity.AdminActivity;
+import fr.do_f.rssfeedify.main.settings.activity.DetailsUserActivity;
 import fr.do_f.rssfeedify.main.settings.activity.SettingsActivity;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import retrofit2.http.GET;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
@@ -52,23 +61,28 @@ public class MainActivity extends AppCompatActivity
 
     private static final String     TAG = "MainActivity";
 
+    @Bind(R.id.drawer_layout)
+    DrawerLayout                drawer;
+
     @Bind(R.id.rvFeed)
-    RecyclerView            feed;
+    RecyclerView                feed;
 
     @Bind(R.id.fab)
-    FloatingActionButton    fab;
+    FloatingActionButton        fab;
 
     @Bind(R.id.menu_home)
-    LinearLayout            home;
+    LinearLayout                home;
 
     @Bind(R.id.toolbar)
-    Toolbar                 toolbar;
+    Toolbar                     toolbar;
 
-    private String          token;
-    private List<Feed>      feedInfo;
-    private NetworkReceiver network;
-    private MenuAdapter     adapter;
-    private int             networkState;
+    private String              token;
+    private List<Feed>          feedInfo;
+    private NetworkReceiver     network;
+    private MenuAdapter         adapter;
+    private int                 networkState;
+    private SharedPreferences   sp;
+    private GetUserReponse      cUser;
 
 
     public static void newActivity(Activity activity)
@@ -82,30 +96,8 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-        token = getSharedPreferences(Utils.SP, Context.MODE_PRIVATE).getString(Utils.TOKEN, "null");
-        setSupportActionBar(toolbar);
 
-        fab.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.ganjify)));
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
-        toggle.syncState();
-
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
-
-        IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
-        network = new NetworkReceiver();
-        this.registerReceiver(network, filter);
-
-
-        network = new NetworkReceiver();
-        network.setOnNetworkStateChanged(this);
-        networkState = network.singleCheck(this);
-
-        initFeed();
+        init();
 
         FragmentManager fm = getFragmentManager();
         fm.beginTransaction()
@@ -120,6 +112,98 @@ public class MainActivity extends AppCompatActivity
         if (requestCode == Utils.REQUEST_CODE && resultCode == RESULT_OK) {
             refreshRecycler();
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (network == null)
+            initNetwork();
+    }
+
+//    @Override
+//    public void onPause() {
+//        Log.d(TAG, "ONPAUSE");
+//        unregisterReceiver(network);
+//        super.onPause();
+//    }
+//
+//    @Override
+//    protected void onStop() {
+//        Log.d(TAG, "ONSTOP");
+//        if (network != null)
+//            unregisterReceiver(network);
+//        super.onStop();
+//    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "onDestroy");
+        // Unregisters BroadcastReceiver when app is destroyed.
+        if (network != null) {
+            this.unregisterReceiver(network);
+        }
+    }
+
+    public void init() {
+        initNetwork();
+        initView();
+        initFeed();
+    }
+
+    public void initView() {
+        sp = getSharedPreferences(Utils.SP, Context.MODE_PRIVATE);
+        token = sp.getString(Utils.TOKEN, "null");
+        Log.d(TAG, "token : "+token);
+        if (token.equals("null"))
+            logout();
+
+        Log.d(TAG, "--- INIT ---");
+        Log.d(TAG, "USERNAME : "+sp.getString(Utils.USERNAME, "null"));
+
+        setSupportActionBar(toolbar);
+        getUserInfo();
+
+        network.setOnNetworkStateChanged(this);
+        networkState = network.singleCheck(this);
+
+        fab.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.ganjify)));
+
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.setDrawerListener(toggle);
+        toggle.syncState();
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+    }
+
+    public void getUserInfo() {
+        Call<GetUserReponse> call = RestClient.get(token).getUser(sp.getString(Utils.USERNAME, "null"));
+        call.enqueue(new Callback<GetUserReponse>() {
+            @Override
+            public void onResponse(Call<GetUserReponse> call, Response<GetUserReponse> response) {
+                if (response.body() != null) {
+                    cUser = response.body();
+                    TextView menuTitle = (TextView) drawer.findViewById(R.id.menu_username);
+                    menuTitle.setText(cUser.getUsername());
+                } else {
+                    Log.d(TAG, "getUserInfo body == null : "+response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<GetUserReponse> call, Throwable t) {
+                Log.d(TAG, "getUserInfo onFailure : "+t.getMessage());
+            }
+        });
+    }
+
+    public void initNetwork() {
+        IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+        network = new NetworkReceiver();
+        registerReceiver(network, filter);
     }
 
     // init Drawer Menu List
@@ -162,7 +246,7 @@ public class MainActivity extends AppCompatActivity
                     adapter.refreshAdapter(response.body().getFeed());
                 }
                 else {
-                    Log.d(TAG, "error 500");
+                    Log.d(TAG, "refreshRecycler :: error 500");
                 }
             }
 
@@ -230,15 +314,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-
-
-
-
-
-    // USELESS
-
-
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -248,25 +323,54 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
+
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-//            Intent i = new Intent(this, SettingsActivity.class);
-//            startActivity(i);
-            int[] startingLocation = new int[2];
-            toolbar.getLocationOnScreen(startingLocation);
-            startingLocation[0] += toolbar.getWidth() / 2;
-            AdminActivity.newActivity(startingLocation, this);
-            overridePendingTransition(0, 0);
-            return true;
+        switch (id) {
+            case R.id.action_settings:
+                if (cUser.getType().equals("admin")) {
+                    int[] startingLocation = new int[2];
+                    toolbar.getLocationOnScreen(startingLocation);
+                    startingLocation[0] += toolbar.getWidth() / 2;
+                    AdminActivity.newActivity(startingLocation, this);
+                    overridePendingTransition(0, 0);
+                } else {
+                    UsersReponse.User tmp = new UsersReponse.User(cUser.getUsername(), cUser.getType());
+                    DetailsUserActivity.newActivity(tmp, false, this);
+                }
+                return true;
+            case R.id.action_logout:
+                logout();
+                return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
+
+    private void logout() {
+        final Activity a = this;
+        Call<LogoutResponse> call = RestClient.get(token).logout();
+        call.enqueue(new Callback<LogoutResponse>() {
+            @Override
+            public void onResponse(Call<LogoutResponse> call, Response<LogoutResponse> response) {
+                if (response.body() != null) {
+                    sp.edit().putString(Utils.TOKEN, "null").apply();
+                    sp.edit().putString(Utils.USERNAME, "null").apply();
+                    LoginActivity.newActivity(a);
+                    finish();
+                } else {
+                    Log.d(TAG, "logout() body == null "+response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<LogoutResponse> call, Throwable t) {
+                Log.d(TAG, "onFailure : "+t.getMessage());
+            }
+        });
+    }
+
+    // USELESS
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override

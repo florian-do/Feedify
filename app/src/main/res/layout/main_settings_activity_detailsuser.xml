@@ -53,7 +53,7 @@
             android:layout_height="wrap_content"
             android:checked="false"
             android:layout_marginBottom="15dp"
-            android:text="@string/action_settings"/>
+            android:text="@string/detailuser_admin"/>
 
         <Button
             android:id="@+id/updateuser_submit"
@@ -63,7 +63,7 @@
             android:layout_marginTop="15dp"
             android:background="@drawable/drawable_button"
             android:textColor="@color/login_text_button"
-            android:text="@string/login_login_login"/>
+            android:text="@string/detailuser_update"/>
 
     </LinearLayout>
 
