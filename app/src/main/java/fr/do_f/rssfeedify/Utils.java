@@ -38,6 +38,8 @@ public class Utils {
     public static final int         ANIM_DURATION = 250;
     public static final int         REQUEST_CODE = 1337;
 
+    public static final String      FEED_FRAGMENT = "feed_fragment";
+
     public static final int[]       colors = {
                 R.color.md_red_500,
                 R.color.md_red_A200,
@@ -66,9 +68,11 @@ public class Utils {
                 R.color.md_deep_orange_A200
     };
 
-    public static <T> void write(Context context, Collection<T> list, String fileName) {
+    public static <T> void write(Context context, Collection<T> list, String file) {
         Gson gson = new Gson();
         String json = gson.toJson(list);
+        String  username = context.getSharedPreferences(SP, Context.MODE_PRIVATE).getString(USERNAME, "null");
+        String fileName = username+"-"+file;
         // Create a file in the Internal Storage
 
         FileOutputStream outputStream = null;
@@ -82,7 +86,10 @@ public class Utils {
         }
     }
 
-    public static <T> List<T> read(Context context, String fileName, Type listType) {
+    public static <T> List<T> read(Context context, String tmpfile, Type listType) {
+
+        String  username = context.getSharedPreferences(SP, Context.MODE_PRIVATE).getString(USERNAME, "null");
+        String fileName = username+"-"+tmpfile;
 
         BufferedReader input = null;
         File file = null;

@@ -1,6 +1,7 @@
 package fr.do_f.rssfeedify.main;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
@@ -22,6 +23,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -57,7 +59,8 @@ import retrofit2.http.GET;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
-        MenuAdapter.onItemClickListener, NetworkReceiver.onNetworkStateChanged {
+        MenuAdapter.onItemClickListener,
+        NetworkReceiver.onNetworkStateChanged, DrawerLayout.DrawerListener {
 
     private static final String     TAG = "MainActivity";
 
@@ -101,7 +104,7 @@ public class MainActivity extends AppCompatActivity
 
         FragmentManager fm = getFragmentManager();
         fm.beginTransaction()
-                .replace(R.id.container, FeedFragment.newInstance(Utils.HOME, null))
+                .replace(R.id.container, FeedFragment.newInstance(Utils.HOME, null), Utils.FEED_FRAGMENT)
                 .addToBackStack(null)
                 .commit();
     }
@@ -120,21 +123,6 @@ public class MainActivity extends AppCompatActivity
         if (network == null)
             initNetwork();
     }
-
-//    @Override
-//    public void onPause() {
-//        Log.d(TAG, "ONPAUSE");
-//        unregisterReceiver(network);
-//        super.onPause();
-//    }
-//
-//    @Override
-//    protected void onStop() {
-//        Log.d(TAG, "ONSTOP");
-//        if (network != null)
-//            unregisterReceiver(network);
-//        super.onStop();
-//    }
 
     @Override
     public void onDestroy() {
@@ -173,6 +161,19 @@ public class MainActivity extends AppCompatActivity
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
+        drawer.addDrawerListener(this);
+
+        LinearLayout logout = (LinearLayout) drawer.findViewById(R.id.menu_logout);
+        logout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (networkState == NetworkReceiver.STATE_ON) {
+                    logout();
+                    drawer.closeDrawer(GravityCompat.START);
+                }
+            }
+        });
+
         toggle.syncState();
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
@@ -283,7 +284,7 @@ public class MainActivity extends AppCompatActivity
     public void onItemClick(int position) {
         FragmentManager fm = getFragmentManager();
         fm.beginTransaction()
-                .replace(R.id.container, FeedFragment.newInstance(Utils.FEEDBYID, feedInfo.get(position)))
+                .replace(R.id.container, FeedFragment.newInstance(Utils.FEEDBYID, feedInfo.get(position)), Utils.FEED_FRAGMENT)
                 .addToBackStack(null)
                 .commit();
 
@@ -295,7 +296,7 @@ public class MainActivity extends AppCompatActivity
     public void onClickHome() {
         FragmentManager fm = getFragmentManager();
         fm.beginTransaction()
-                .replace(R.id.container, FeedFragment.newInstance(Utils.HOME, null))
+                .replace(R.id.container, FeedFragment.newInstance(Utils.HOME, null), Utils.FEED_FRAGMENT)
                 .addToBackStack(null)
                 .commit();
 
@@ -306,11 +307,16 @@ public class MainActivity extends AppCompatActivity
     // do_f Interface on Network Change
     @Override
     public void onStateChange(int state) {
+        Log.d(TAG, "onStateChange NETWORK == "+state);
         if (state == NetworkReceiver.STATE_ON) {
             //onRefresh();
             networkState = state;
         } else {
             networkState = state;
+        }
+        Fragment f = getFragmentManager().findFragmentByTag(Utils.FEED_FRAGMENT);
+        if (f instanceof FeedFragment) {
+            ((FeedFragment) f).onStateChange(state);
         }
     }
 
@@ -323,6 +329,9 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+
+        if (networkState == NetworkReceiver.STATE_OFF)
+            return false;
 
         int id = item.getItemId();
 
@@ -392,8 +401,27 @@ public class MainActivity extends AppCompatActivity
 
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    @Override
+    public void onDrawerSlide(View drawerView, float slideOffset) {
+
+    }
+
+    @Override
+    public void onDrawerOpened(View drawerView) {
+        refreshRecycler();
+    }
+
+    @Override
+    public void onDrawerClosed(View drawerView) {
+        Log.d(TAG, "onDrawerClosed");
+    }
+
+    @Override
+    public void onDrawerStateChanged(int newState) {
+        Log.d(TAG, "STATE = "+newState);
     }
 }

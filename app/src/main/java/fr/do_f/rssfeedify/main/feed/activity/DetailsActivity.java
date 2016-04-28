@@ -67,8 +67,6 @@ public class DetailsActivity extends AppCompatActivity implements Html.ImageGett
     TextView                link;
 
     private Articles        articles;
-    private List<String>    iframeSrc = new ArrayList<String>();
-    private int             position = 0;
 
     public static void newActivity(Activity activity, View v, Articles articles) {
         Intent i = new Intent(activity, DetailsActivity.class);

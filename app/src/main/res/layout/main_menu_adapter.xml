@@ -3,6 +3,7 @@
     android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="@color/menu_background"
     android:padding="10dp">
 
     <RelativeLayout
@@ -12,8 +13,8 @@
 
         <ImageView
             android:id="@+id/menu_circle"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_centerVertical="true"
             android:layout_centerHorizontal="true"
             android:background="@drawable/drawable_menu_circle"/>
@@ -25,7 +26,7 @@
             android:layout_centerVertical="true"
             android:layout_centerHorizontal="true"
             android:textColor="@color/white"
-            android:textSize="35sp"/>
+            android:textSize="28sp"/>
 
     </RelativeLayout>
     
@@ -36,18 +37,18 @@
         android:layout_marginLeft="10dp"
         android:layout_weight="1.2"
         android:layout_gravity="center"
-        android:textSize="20sp"
+        android:textSize="18sp"
+        android:textColor="@color/white_material"
         android:text="@string/app_name"/>
 
-    <!--<TextView-->
-        <!--android:id="@+id/menu_news"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_weight="3.5"-->
-        <!--android:layout_gravity="center"-->
-        <!--android:gravity="center"-->
-        <!--android:textColor="@color/white"-->
-        <!--android:background="@drawable/drawable_notification"-->
-        <!--android:text="@string/menufeed_news"/>-->
+    <TextView
+        android:id="@+id/menu_news"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="3"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:textColor="@color/white_material"
+        android:text="@string/menufeed_news"/>
 
 </LinearLayout>

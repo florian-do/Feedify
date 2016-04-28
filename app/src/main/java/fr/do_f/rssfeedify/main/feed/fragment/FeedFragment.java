@@ -1,5 +1,7 @@
 package fr.do_f.rssfeedify.main.feed.fragment;
 
+import android.annotation.TargetApi;
+import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
@@ -38,8 +40,7 @@ import retrofit2.Response;
 public class FeedFragment extends Fragment
         implements SwipeRefreshLayout.OnRefreshListener,
         FeedAdapter.onItemClickListener,
-        SectionFeedAdapter.onSwitchCheckedListener,
-        NetworkReceiver.onNetworkStateChanged {
+        SectionFeedAdapter.onSwitchCheckedListener {
 
     private static final String     TAG = "FeedFragment";
     private static final String     ARG_TYPE = "type";
@@ -62,7 +63,6 @@ public class FeedFragment extends Fragment
 
     private String          type;
     private Feed            feed;
-
 
     public FeedFragment() {
         // Required empty public constructor
@@ -112,28 +112,17 @@ public class FeedFragment extends Fragment
 
         swipe.setRefreshing(true);
         network = new NetworkReceiver();
-        network.setOnNetworkStateChanged(this);
         networkState = network.singleCheck(getActivity());
+
         setupFeed();
         initFeed();
     }
 
     // FIRST CALL FOR INIT FEED
     public void initFeed() {
-
-//        if (mAdapter == null) {
-//            Log.d(TAG, "mAdapter == null");
-//        }
-//        if (rvFeed == null) {
-//            Log.d(TAG, "rvFeed == null");
-//        }
-//
-//        if (rvFeed.getAdapter() == null) {
-//            Log.d(TAG, "get Adapter == null");
-//        }
-
         if (networkState == NetworkReceiver.STATE_OFF)
         {
+            swipe.setEnabled(false);
             String fileName = (feed != null) ? feed.getName() : "home";
             Type listType = new TypeToken<List<Articles>>() {}.getType();
             articles = Utils.read(getActivity(), fileName, listType);
@@ -143,10 +132,13 @@ public class FeedFragment extends Fragment
                 Snackbar.make(getView(), "Error, can't retreive the feed", Snackbar.LENGTH_SHORT).show();
                 return ;
             }
+            Log.d(TAG, "refreshAdapter NETWORK OFF");
             mAdapter.refreshAdapter(articles, true);
+            swipe.setRefreshing(false);
         }
         else
         {
+            swipe.setEnabled(true);
             Call<FeedResponse> call;
             if (type.equals(Utils.HOME)) {
                 call = RestClient.get(token).getAllFeed(1);
@@ -154,6 +146,7 @@ public class FeedFragment extends Fragment
                 call = RestClient.get(token).getAllFeedById(feed.getId(), 1);
             }
 
+            Log.d(TAG, "INIT FEED NETWORK ON");
             Log.d(TAG, "TOKEN : "+token);
 
             call.enqueue(new Callback<FeedResponse>() {
@@ -168,7 +161,6 @@ public class FeedFragment extends Fragment
                         swipe.setRefreshing(false);
                     } else {
                         Log.d(TAG, "setupFeed FAIL : "+response.code());
-                        //initFeed();
                     }
                 }
 
@@ -190,17 +182,22 @@ public class FeedFragment extends Fragment
         mAdapter.setOnItemClickListener(this);
 
         rvFeed.setAdapter(mAdapter);
-        rvFeed.addOnScrollListener(new EndlessRecyclerViewScrollListener(lm) {
-            @Override
-            public void onLoadMore(int page, int totalItemsCount) {
-                // TODO: REFRESH API CALL
-                if (page == 0) {
 
-                } else {
-                    addPage(page+1);
+        //
+        if (networkState == NetworkReceiver.STATE_ON) {
+            rvFeed.addOnScrollListener(new EndlessRecyclerViewScrollListener(lm) {
+                @Override
+                public void onLoadMore(int page, int totalItemsCount) {
+                    // TODO: REFRESH API CALL
+                    if (page == 0) {
+
+                    } else {
+                        addPage(page+1);
+                    }
                 }
-            }
-        });
+            });
+        }
+        Log.d(TAG, "END");
     }
 
 
@@ -261,29 +258,7 @@ public class FeedFragment extends Fragment
     // do_f Interface Recycler View onClick
     @Override
     public void onItemClick(Articles articles, View v) {
-        //markArticleAsRead(articles);
         DetailsActivity.newActivity(getActivity(), v, articles);
-    }
-
-
-    private void markArticleAsRead(Articles articles) {
-        Call<ReadArticleResponse> call = RestClient.get(token).readArticle(articles.getId());
-        call.enqueue(new Callback<ReadArticleResponse>() {
-            @Override
-            public void onResponse(Call<ReadArticleResponse> call, Response<ReadArticleResponse> response) {
-                if (response.body() != null) {
-                    Log.d(TAG, "SUCCESS");
-                } else {
-                    Log.d(TAG, "PASSCCESS + "+response.code());
-                }
-            }
-
-            @Override
-            public void onFailure(Call<ReadArticleResponse> call, Throwable t) {
-                Log.d(TAG, "onFailure : "+t.getMessage());
-            }
-        });
-
     }
 
     // do_f Interface Switch Section Adapter
@@ -295,10 +270,12 @@ public class FeedFragment extends Fragment
             Log.d(TAG, "onCheckedChanged : HOME");
     }
 
-    // do_f Interface on Network Change
-    @Override
+    // Activity call when network state change
     public void onStateChange(int state) {
+        Log.d(TAG, "onStateChange NETWORK == "+state);
         if (state == NetworkReceiver.STATE_ON) {
+            Log.d(TAG, "NETWORK == ON");
+            swipe.setEnabled(true);
             onRefresh();
             networkState = state;
         } else {

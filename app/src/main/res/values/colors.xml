@@ -11,6 +11,8 @@
     <color name="feed_add_separator">#e5e5e5</color>
     <color name="white_material">#fafafa</color>
 
+    <color name="menu_background">#2C3E50</color>
+
     <color name="login_title">#494949</color>
     <color name="login_text_button">#ffffff</color>
 

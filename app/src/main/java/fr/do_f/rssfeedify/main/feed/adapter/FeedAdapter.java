@@ -1,5 +1,6 @@
 package fr.do_f.rssfeedify.main.feed.adapter;
 
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
@@ -92,8 +93,7 @@ public class FeedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
     }
 
-    public class CellFeedViewHolder extends RecyclerView.ViewHolder
-    {
+    public class CellFeedViewHolder extends RecyclerView.ViewHolder implements Html.ImageGetter {
 
         @Bind(R.id.feed_title)
         TextView            title;
@@ -135,7 +135,7 @@ public class FeedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             }
 
             link.setText(articles.getLink().substring(0, 30)+"...");
-            preview.setText(Html.fromHtml(articles.getPreview().substring(0, 100).replace("<p>", "")+"..."));
+            preview.setText(Html.fromHtml(articles.getPreview().substring(0, 100).replace("<p>", "")+"...", this, null));
 
             title.setText(articles.getTitle());
             v.setOnClickListener(new View.OnClickListener() {
@@ -147,6 +147,15 @@ public class FeedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     }
                 }
             });
+        }
+
+        @Override
+        public Drawable getDrawable(String source) {
+            Drawable d = v.getResources().getDrawable(R.drawable.drawable_background_box);
+            if (d != null) {
+                d.setBounds(0, 0, 0, 0);
+            }
+            return d;
         }
     }
 }
