@@ -11,6 +11,7 @@ I only made the Android Application
 He's actualy on development
 
 API Documentation : http://romain-zanchi.com:4497
+Play Store : https://play.google.com/apps/testing/fr.do_f.rssfeedify
 
 ### External Library used ###
 
@@ -20,7 +21,7 @@ API Documentation : http://romain-zanchi.com:4497
 
 ### Specs ###
 
-* Android Studio 2
+* Android Studio 2.1
 * MinSdk 16
 * targetSdk 23
 * applicationId "fr.do_f.rssfeedify"
