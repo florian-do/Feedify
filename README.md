@@ -21,7 +21,7 @@ Play Store : https://play.google.com/apps/testing/fr.do_f.rssfeedify
 
 ### Specs ###
 
-* Android Studio 2
+* Android Studio 2.1
 * MinSdk 16
 * targetSdk 23
 * applicationId "fr.do_f.rssfeedify"
