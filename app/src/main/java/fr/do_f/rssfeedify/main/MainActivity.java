@@ -20,10 +20,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -38,9 +42,11 @@ import butterknife.OnClick;
 import fr.do_f.rssfeedify.R;
 import fr.do_f.rssfeedify.Utils;
 import fr.do_f.rssfeedify.api.RestClient;
+import fr.do_f.rssfeedify.api.json.feeds.MarkAllFeedAsReadResponse;
 import fr.do_f.rssfeedify.api.json.login.LogoutResponse;
 import fr.do_f.rssfeedify.api.json.menu.GetFeedResponse;
 import fr.do_f.rssfeedify.api.json.menu.GetFeedResponse.*;
+import fr.do_f.rssfeedify.api.json.users.DeleteUserResponse;
 import fr.do_f.rssfeedify.api.json.users.GetUserReponse;
 import fr.do_f.rssfeedify.api.json.users.UsersReponse;
 import fr.do_f.rssfeedify.broadcast.NetworkReceiver;
@@ -49,9 +55,11 @@ import fr.do_f.rssfeedify.main.feed.fragment.FeedFragment;
 import fr.do_f.rssfeedify.main.feed.activity.AddFeedActivity;
 import fr.do_f.rssfeedify.main.menu.adapter.MenuAdapter;
 
+import fr.do_f.rssfeedify.main.menu.view.ContextMenuRecyclerView;
 import fr.do_f.rssfeedify.main.settings.activity.AdminActivity;
 import fr.do_f.rssfeedify.main.settings.activity.DetailsUserActivity;
 import fr.do_f.rssfeedify.main.settings.activity.SettingsActivity;
+import fr.do_f.rssfeedify.main.settings.callback.RecyclerViewSwipedCallback;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -86,6 +94,9 @@ public class MainActivity extends AppCompatActivity
     private int                 networkState;
     private SharedPreferences   sp;
     private GetUserReponse      cUser;
+    private View                view;
+
+    private int                 cPosition;
 
 
     public static void newActivity(Activity activity)
@@ -99,7 +110,7 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-
+        view = findViewById(android.R.id.content);
         init();
 
         FragmentManager fm = getFragmentManager();
@@ -114,6 +125,8 @@ public class MainActivity extends AppCompatActivity
         //super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == Utils.REQUEST_CODE && resultCode == RESULT_OK) {
             refreshRecycler();
+        } else if (requestCode == Utils.REQUEST_CODE && resultCode == Utils.RESULT_DELETE) {
+            deleteUser();
         }
     }
 
@@ -127,7 +140,6 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.d(TAG, "onDestroy");
         // Unregisters BroadcastReceiver when app is destroyed.
         if (network != null) {
             this.unregisterReceiver(network);
@@ -150,11 +162,11 @@ public class MainActivity extends AppCompatActivity
         Log.d(TAG, "--- INIT ---");
         Log.d(TAG, "USERNAME : "+sp.getString(Utils.USERNAME, "null"));
 
-        setSupportActionBar(toolbar);
-        getUserInfo();
-
         network.setOnNetworkStateChanged(this);
         networkState = network.singleCheck(this);
+
+        setSupportActionBar(toolbar);
+        getUserInfo();
 
         fab.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.ganjify)));
 
@@ -181,24 +193,32 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void getUserInfo() {
-        Call<GetUserReponse> call = RestClient.get(token).getUser(sp.getString(Utils.USERNAME, "null"));
-        call.enqueue(new Callback<GetUserReponse>() {
-            @Override
-            public void onResponse(Call<GetUserReponse> call, Response<GetUserReponse> response) {
-                if (response.body() != null) {
-                    cUser = response.body();
-                    TextView menuTitle = (TextView) drawer.findViewById(R.id.menu_username);
-                    menuTitle.setText(cUser.getUsername());
-                } else {
-                    Log.d(TAG, "getUserInfo body == null : "+response.code());
-                }
-            }
 
-            @Override
-            public void onFailure(Call<GetUserReponse> call, Throwable t) {
-                Log.d(TAG, "getUserInfo onFailure : "+t.getMessage());
-            }
-        });
+        String cUsername = sp.getString(Utils.USERNAME, "null");
+        TextView menuTitle = (TextView) drawer.findViewById(R.id.menu_username);
+        menuTitle.setText(cUsername);
+
+        Log.d(TAG, "network state == "+networkState);
+
+        if (networkState == NetworkReceiver.STATE_ON) {
+            Log.d(TAG, "network state == "+networkState);
+            Call<GetUserReponse> call = RestClient.get(token).getUser(cUsername);
+            call.enqueue(new Callback<GetUserReponse>() {
+                @Override
+                public void onResponse(Call<GetUserReponse> call, Response<GetUserReponse> response) {
+                    if (response.body() != null) {
+                        cUser = response.body();
+                    } else {
+                        Log.d(TAG, "getUserInfo body == null : "+response.code());
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<GetUserReponse> call, Throwable t) {
+                    Log.d(TAG, "getUserInfo onFailure : "+t.getMessage());
+                }
+            });
+        }
     }
 
     public void initNetwork() {
@@ -231,9 +251,15 @@ public class MainActivity extends AppCompatActivity
         LinearLayoutManager lm = new LinearLayoutManager(this);
         feed.setLayoutManager(lm);
         feed.setHasFixedSize(true);
-        adapter = new MenuAdapter();
+        adapter = new MenuAdapter(this, view);
         adapter.setOnItemClickListener(this);
         feed.setAdapter(adapter);
+        registerForContextMenu(feed);
+
+        ItemTouchHelper.Callback callback =
+                new RecyclerViewSwipedCallback(adapter);
+        ItemTouchHelper touchHelper = new ItemTouchHelper(callback);
+        touchHelper.attachToRecyclerView(feed);
     }
 
     public void refreshRecycler() {
@@ -260,7 +286,6 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -292,6 +317,11 @@ public class MainActivity extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
     }
 
+    @Override
+    public void setCurrentPosition(int position) {
+        cPosition = position;
+    }
+
     @OnClick(R.id.menu_home)
     public void onClickHome() {
         FragmentManager fm = getFragmentManager();
@@ -318,6 +348,45 @@ public class MainActivity extends AppCompatActivity
         if (f instanceof FeedFragment) {
             ((FeedFragment) f).onStateChange(state);
         }
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_menu_drawer, menu);
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_drawer_delete:
+                markAllArticlesAsRead(feedInfo.get(cPosition).getId());
+                return true;
+            default:
+                return super.onContextItemSelected(item);
+        }
+    }
+
+    private void markAllArticlesAsRead(int id) {
+        Log.d(TAG, "ID : "+id);
+        Call<MarkAllFeedAsReadResponse> call = RestClient.get(token).markAllFeedAsRead(id);
+        call.enqueue(new Callback<MarkAllFeedAsReadResponse>() {
+            @Override
+            public void onResponse(Call<MarkAllFeedAsReadResponse> call, Response<MarkAllFeedAsReadResponse> response) {
+                if (response.body() != null) {
+                    refreshRecycler();
+                    Snackbar.make(view, "All articles has been set to \"view\"", Snackbar.LENGTH_SHORT).show();
+                } else {
+                    Snackbar.make(view, "FAIL OL + "+response.code(), Snackbar.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<MarkAllFeedAsReadResponse> call, Throwable t) {
+
+            }
+        });
     }
 
     @Override
@@ -356,6 +425,29 @@ public class MainActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
+    private void deleteUser() {
+        final Activity a = this;
+        Call<DeleteUserResponse> call = RestClient.get(token).deleteUser(cUser.getUsername());
+        call.enqueue(new Callback<DeleteUserResponse>() {
+            @Override
+            public void onResponse(Call<DeleteUserResponse> call, Response<DeleteUserResponse> response) {
+                if (response.body() != null) {
+                    sp.edit().putString(Utils.TOKEN, "null").apply();
+                    sp.edit().putString(Utils.USERNAME, "null").apply();
+                    LoginActivity.newActivity(a);
+                    finish();
+                } else {
+                    Log.d(TAG, "response == null : "+response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<DeleteUserResponse> call, Throwable t) {
+                Log.d(TAG, "onFailure : "+t.getMessage());
+            }
+        });
+    }
+
     private void logout() {
         final Activity a = this;
         Call<LogoutResponse> call = RestClient.get(token).logout();
@@ -383,32 +475,10 @@ public class MainActivity extends AppCompatActivity
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
-        int id = item.getItemId();
-
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
-        }
-
-        drawer.closeDrawer(GravityCompat.START);
-        return true;
-    }
+    public boolean onNavigationItemSelected(MenuItem item) { return true; }
 
     @Override
-    public void onDrawerSlide(View drawerView, float slideOffset) {
-
-    }
+    public void onDrawerSlide(View drawerView, float slideOffset) { }
 
     @Override
     public void onDrawerOpened(View drawerView) {
@@ -416,12 +486,8 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onDrawerClosed(View drawerView) {
-        Log.d(TAG, "onDrawerClosed");
-    }
+    public void onDrawerClosed(View drawerView) { }
 
     @Override
-    public void onDrawerStateChanged(int newState) {
-        Log.d(TAG, "STATE = "+newState);
-    }
+    public void onDrawerStateChanged(int newState) { }
 }

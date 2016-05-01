@@ -4,6 +4,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
 
+import fr.do_f.rssfeedify.main.menu.adapter.MenuAdapter;
 import fr.do_f.rssfeedify.main.settings.adapter.AdminAdapter;
 
 /**
@@ -11,7 +12,8 @@ import fr.do_f.rssfeedify.main.settings.adapter.AdminAdapter;
  */
 public class RecyclerViewSwipedCallback extends ItemTouchHelper.Callback {
 
-    private final AdminAdapter mAdapter;
+    private AdminAdapter    aAdapter = null;
+    private  MenuAdapter    mAdapter = null;
 
     @Override
     public boolean isLongPressDragEnabled() {
@@ -24,6 +26,10 @@ public class RecyclerViewSwipedCallback extends ItemTouchHelper.Callback {
     }
 
     public RecyclerViewSwipedCallback(AdminAdapter adapter) {
+        this.aAdapter = adapter;
+    }
+
+    public RecyclerViewSwipedCallback(MenuAdapter adapter) {
         mAdapter = adapter;
     }
 
@@ -42,9 +48,9 @@ public class RecyclerViewSwipedCallback extends ItemTouchHelper.Callback {
     @Override
     public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
         Log.d("TEST", "onSwiped + "+direction);
-        mAdapter.onItemDismiss(viewHolder.getAdapterPosition());
-        if (direction == 32) {
-            //mAdapter.notifyDataSetChanged();
-        }
+        if (aAdapter != null)
+            aAdapter.onItemDismiss(viewHolder.getAdapterPosition());
+        else if (mAdapter != null)
+            mAdapter.onItemDismiss(viewHolder.getAdapterPosition());
     }
 }

@@ -1,13 +1,17 @@
 package fr.do_f.rssfeedify.main.settings.activity;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Switch;
 
@@ -42,6 +46,9 @@ public class DetailsUserActivity extends AppCompatActivity {
     @Bind(R.id.updateuser_admin)
     Switch              isAdmin;
 
+    @Bind(R.id.updateuser_delete)
+    Button              delete;
+
     private UsersReponse.User   user;
     private String              token;
     private Boolean             type;
@@ -67,9 +74,9 @@ public class DetailsUserActivity extends AppCompatActivity {
     @OnClick(R.id.updateuser_submit)
     public void onSubmit(View v) {
 
-        if (username.getText().length() < 6
-                || password.getText().length() < 6)
+        if (password.getText().length() > 0 && password.getText().length() < 6)
         {
+            password.requestFocus();
             return ;
         }
 
@@ -77,11 +84,20 @@ public class DetailsUserActivity extends AppCompatActivity {
                 ? "admin"
                 : "user";
 
-        User u = new User(
-                username.getText().toString(),
-                password.getText().toString(),
-                type
-        );
+        User u;
+        if (password.getText().length() == 0) {
+            u = new User(
+                    username.getText().toString(),
+                    type
+            );
+        } else {
+            u = new User(
+                    username.getText().toString(),
+                    password.getText().toString(),
+                    type
+            );
+        }
+
         Call<UpdateUserResponse> call = RestClient.get(token).updateUser(user.getUsername(), u);
         call.enqueue(new Callback<UpdateUserResponse>() {
             @Override
@@ -115,11 +131,50 @@ public class DetailsUserActivity extends AppCompatActivity {
 
 
     private void initView() {
-        token = getSharedPreferences(Utils.SP, Context.MODE_PRIVATE).getString(Utils.TOKEN, "null");
+        SharedPreferences sp = getSharedPreferences(Utils.SP, Context.MODE_PRIVATE);
+        token = sp.getString(Utils.TOKEN, "null");
+        String cUsername = sp.getString(Utils.USERNAME, "null");
         username.setText(user.getUsername());
+
+        // Show or not the admin switch
         if (!type) {
             isAdmin.setVisibility(View.GONE);
+        } else {
+            isAdmin.setChecked((user.getType().equals("admin")));
         }
-        isAdmin.setChecked((user.getType().equals("admin")));
+
+        //  Show or not the delete button
+        if (user.getUsername().equals(cUsername)) {
+            delete.setVisibility(View.VISIBLE);
+        } else {
+            delete.setVisibility(View.GONE);
+        }
+
+
+    }
+
+    @OnClick(R.id.updateuser_delete)
+    public void onDeleteUser() {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                setResult(Utils.RESULT_DELETE, null);
+                finish();
+            }
+        });
+
+        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+            }
+        });
+        String message = getResources().getString(R.string.snackbar_deleteyourself);
+        builder.setMessage(message);
+
+        final AlertDialog dialog = builder.create();
+        dialog.setCanceledOnTouchOutside(false);
+        dialog.show();
     }
 }

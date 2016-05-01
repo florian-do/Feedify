@@ -29,6 +29,11 @@ public class UpdateUserResponse {
             this.type = type;
         }
 
+        public User(String username, String type) {
+            this.username = username;
+            this.type = type;
+        }
+
         public String getUsername() {
             return username;
         }

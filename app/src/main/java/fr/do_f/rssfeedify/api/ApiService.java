@@ -2,8 +2,11 @@ package fr.do_f.rssfeedify.api;
 
 import fr.do_f.rssfeedify.api.json.feeds.AddFeedResponse;
 import fr.do_f.rssfeedify.api.json.feeds.AddFeedResponse.AddFeedPost;
+import fr.do_f.rssfeedify.api.json.feeds.DeleteFeedResponse;
 import fr.do_f.rssfeedify.api.json.feeds.FeedResponse;
+import fr.do_f.rssfeedify.api.json.feeds.MarkAllFeedAsReadResponse;
 import fr.do_f.rssfeedify.api.json.feeds.article.ReadArticleResponse;
+import fr.do_f.rssfeedify.api.json.feeds.worker.WorkerResponse;
 import fr.do_f.rssfeedify.api.json.login.LoginResponse;
 import fr.do_f.rssfeedify.api.json.login.LoginResponse.LoginPost;
 import fr.do_f.rssfeedify.api.json.login.LogoutResponse;
@@ -40,6 +43,12 @@ public interface ApiService {
     @POST("feed")
     Call<AddFeedResponse>       addFeed(@Body AddFeedPost post);
 
+    @DELETE("feed/{id}")
+    Call<DeleteFeedResponse>    deleteFeed(@Path("id") int id);
+
+    @POST("feed/as_read/{feedid}")
+    Call<MarkAllFeedAsReadResponse> markAllFeedAsRead(@Path("feedid") int id);
+
     @GET("feeds")
     Call<GetFeedResponse>       getFeed();
 
@@ -48,6 +57,11 @@ public interface ApiService {
 
     @GET("feed/{feedid}/articles/{page}")
     Call<FeedResponse>          getAllFeedById(@Path("feedid") int id, @Path("page") int page);
+
+    // WORKER
+
+    @GET("worker/refresh/feed/{feedid}")
+    Call<WorkerResponse>        worker(@Path("feedid") int id);
 
     // USERS
 

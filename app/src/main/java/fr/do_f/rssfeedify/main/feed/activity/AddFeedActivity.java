@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.graphics.Point;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Display;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -26,6 +27,7 @@ import fr.do_f.rssfeedify.Utils;
 import fr.do_f.rssfeedify.api.RestClient;
 import fr.do_f.rssfeedify.api.json.feeds.AddFeedResponse;
 import fr.do_f.rssfeedify.api.json.feeds.AddFeedResponse.*;
+import fr.do_f.rssfeedify.api.json.feeds.worker.WorkerResponse;
 import fr.do_f.rssfeedify.view.RevealBackgroundView;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -67,6 +69,7 @@ public class AddFeedActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_feed_activity_addfeed);
         ButterKnife.bind(this);
+        loading.setVisibility(View.GONE);
         init();
         setupRevealBackground();
         SharedPreferences sp = getSharedPreferences(Utils.SP, Context.MODE_PRIVATE);
@@ -118,14 +121,34 @@ public class AddFeedActivity extends AppCompatActivity
                 if (response.body() == null) {
                     showContent();
                 } else {
-                    setResult(RESULT_OK, null);
-                    finish();
+                    updateWorker(response.body().getId());
                 }
             }
 
             @Override
             public void onFailure(Call<AddFeedResponse> call, Throwable t) {
                 showContent();
+            }
+        });
+    }
+
+    public void updateWorker(int id) {
+        Call<WorkerResponse> call = RestClient.get(token).worker(id);
+        call.enqueue(new Callback<WorkerResponse>() {
+            @Override
+            public void onResponse(Call<WorkerResponse> call, Response<WorkerResponse> response) {
+                if (response.body() == null) {
+                    showContent();
+                    Log.d(TAG, "updateWorker : "+response.code());
+                } else {
+                    setResult(RESULT_OK, null);
+                    finish();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<WorkerResponse> call, Throwable t) {
+                Log.d(TAG, "WORKER ON FAILURE + "+t.getMessage());
             }
         });
     }
@@ -140,6 +163,7 @@ public class AddFeedActivity extends AppCompatActivity
                     public void onAnimationEnd(Animator animation) {
                         super.onAnimationEnd(animation);
                         loading.animate().alpha(0).setDuration(Utils.ANIM_DURATION);
+                        loading.setVisibility(View.GONE);
                     }
                 });
     }
@@ -153,6 +177,7 @@ public class AddFeedActivity extends AppCompatActivity
                     @Override
                     public void onAnimationStart(Animator animation) {
                         super.onAnimationStart(animation);
+                        loading.setVisibility(View.VISIBLE);
                         loading.animate().alpha(1).setDuration(Utils.ANIM_DURATION);
                     }
                 });

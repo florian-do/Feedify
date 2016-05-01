@@ -68,6 +68,7 @@ public class LoginFragment extends Fragment {
     @Override
     public void onActivityCreated(Bundle saveInstanceState) {
         super.onActivityCreated(saveInstanceState);
+        loading.setVisibility(View.GONE);
     }
 
     @OnClick(R.id.login_submit)
@@ -100,7 +101,7 @@ public class LoginFragment extends Fragment {
 
             @Override
             public void onFailure(Call<LoginResponse> call, Throwable t) {
-                Snackbar.make(getView(), "onFailure", Snackbar.LENGTH_SHORT).show();
+                Snackbar.make(getView(), "onFailure "+t.getMessage(), Snackbar.LENGTH_SHORT).show();
                 showContent();
             }
         });
@@ -109,28 +110,30 @@ public class LoginFragment extends Fragment {
     public void showContent()
     {
         content.animate()
-                .alpha(1)
-                .setDuration(Utils.ANIM_DURATION)
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        super.onAnimationEnd(animation);
-                        loading.animate().alpha(0).setDuration(Utils.ANIM_DURATION);
-                    }
-                });
+            .alpha(1)
+            .setDuration(Utils.ANIM_DURATION)
+            .setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    super.onAnimationEnd(animation);
+                    loading.animate().alpha(0).setDuration(Utils.ANIM_DURATION);
+                    loading.setVisibility(View.GONE);
+                }
+            });
     }
 
     public void hideContent()
     {
         content.animate()
-                .alpha(0)
-                .setDuration(Utils.ANIM_DURATION)
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationStart(Animator animation) {
-                        super.onAnimationStart(animation);
-                        loading.animate().alpha(1).setDuration(Utils.ANIM_DURATION);
-                    }
-                });
+            .alpha(0)
+            .setDuration(Utils.ANIM_DURATION)
+            .setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    super.onAnimationStart(animation);
+                    loading.setVisibility(View.VISIBLE);
+                    loading.animate().alpha(1).setDuration(Utils.ANIM_DURATION);
+                }
+            });
     }
 }

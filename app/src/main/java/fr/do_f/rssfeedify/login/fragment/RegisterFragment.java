@@ -63,6 +63,7 @@ public class RegisterFragment extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState)
     {
         super.onActivityCreated(savedInstanceState);
+        loading.setVisibility(View.GONE);
     }
 
     @OnClick(R.id.register_submit)
@@ -113,6 +114,7 @@ public class RegisterFragment extends Fragment {
                     @Override
                     public void onAnimationStart(Animator animation) {
                         super.onAnimationStart(animation);
+                        loading.setVisibility(View.GONE);
                         content.animate().alpha(1).setDuration(Utils.ANIM_DURATION);
                     }
                 });
@@ -127,6 +129,7 @@ public class RegisterFragment extends Fragment {
                     @Override
                     public void onAnimationStart(Animator animation) {
                         super.onAnimationStart(animation);
+                        loading.setVisibility(View.VISIBLE);
                         loading.animate().alpha(1).setDuration(Utils.ANIM_DURATION);
                     }
                 });

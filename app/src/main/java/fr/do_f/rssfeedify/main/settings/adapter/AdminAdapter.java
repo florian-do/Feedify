@@ -41,6 +41,7 @@ public class AdminAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     private View                    v;
     private View                    rootView;
     private String                  token;
+    private String                  username;
 
     public AdminAdapter(Context context, View rootView) {
         this.context = context;
@@ -48,6 +49,9 @@ public class AdminAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         token = context
                 .getSharedPreferences(Utils.SP, Context.MODE_PRIVATE)
                 .getString(Utils.TOKEN, "null");
+        username = context
+                .getSharedPreferences(Utils.SP, Context.MODE_PRIVATE)
+                .getString(Utils.USERNAME, "null");
     }
 
     @Override
@@ -76,8 +80,21 @@ public class AdminAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     }
 
     public void onItemDismiss(final int position) {
+
+        final String swipedUsername = users.get(position).getUsername();
+
+        if (swipedUsername.equals(username)) {
+            Snackbar.make(rootView,
+                            rootView.getResources().getString(R.string.snackbar_admin_selfdelete),
+                            Snackbar.LENGTH_LONG)
+                    .show();
+            notifyDataSetChanged();
+            return;
+        }
+
+
         Snackbar snackbar = Snackbar
-                .make(rootView, "Do you want to delete this user ?", Snackbar.LENGTH_LONG)
+                .make(rootView, rootView.getResources().getString(R.string.snackbar_admin_delete), Snackbar.LENGTH_LONG)
                 .setAction("NO", new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -91,7 +108,7 @@ public class AdminAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             public void onDismissed(final Snackbar snackbar, int event) {
                 super.onDismissed(snackbar, event);
                 if (event == DISMISS_EVENT_TIMEOUT) {
-                    Call<DeleteUserResponse> call = RestClient.get(token).deleteUser(users.get(position).getUsername());
+                    Call<DeleteUserResponse> call = RestClient.get(token).deleteUser(swipedUsername);
                     call.enqueue(new Callback<DeleteUserResponse>() {
                         @Override
                         public void onResponse(Call<DeleteUserResponse> call, Response<DeleteUserResponse> response) {
@@ -145,7 +162,7 @@ public class AdminAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                 u.setColor(Utils.colors[random(0, Utils.colors.length - 1)]);
             }
         }
-    }
+    } //http://www.tuxboard.com/feed/
 
     private int random(int min, int max)
     {

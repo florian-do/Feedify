@@ -37,6 +37,7 @@ public class Utils {
 
     public static final int         ANIM_DURATION = 250;
     public static final int         REQUEST_CODE = 1337;
+    public static final int         RESULT_DELETE = 420;
 
     public static final String      FEED_FRAGMENT = "feed_fragment";
 

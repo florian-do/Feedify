@@ -65,7 +65,7 @@ public class AdminActivity extends AppCompatActivity
     public static void newActivity(int[] startingLocation, Activity activity) {
         Intent i = new Intent(activity, AdminActivity.class);
         i.putExtra(ARG_LOC, startingLocation);
-        activity.startActivity(i);
+        activity.startActivityForResult(i, Utils.REQUEST_CODE);
     }
 
     @Override
@@ -99,6 +99,9 @@ public class AdminActivity extends AppCompatActivity
         //super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == Utils.REQUEST_CODE && resultCode == RESULT_OK) {
             refreshRecycler();
+        } else if (requestCode == Utils.REQUEST_CODE && resultCode == Utils.RESULT_DELETE) {
+            setResult(Utils.RESULT_DELETE, null);
+            finish();
         }
     }
 

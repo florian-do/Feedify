@@ -46,7 +46,7 @@ public class FeedFragment extends Fragment
     private static final String     ARG_TYPE = "type";
     private static final String     ARG_FEED = "feed";
 
-    @Bind(R.id.rvFeed)
+    @Bind(R.id.rvFeedFragment)
     RecyclerView            rvFeed;
 
     @Bind(R.id.feed_swipe)
@@ -110,7 +110,7 @@ public class FeedFragment extends Fragment
                 android.R.color.holo_green_light,
                 android.R.color.holo_red_light);
 
-        swipe.setRefreshing(true);
+        //swipe.setRefreshing(true);
         network = new NetworkReceiver();
         networkState = network.singleCheck(getActivity());
 

@@ -11,6 +11,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 
 import android.os.Bundle;
+import android.util.Log;
 
 import butterknife.OnClick;
 import fr.do_f.rssfeedify.R;
@@ -19,10 +20,13 @@ import fr.do_f.rssfeedify.login.fragment.LoginFragment;
 import fr.do_f.rssfeedify.login.fragment.MenuFragment;
 import fr.do_f.rssfeedify.login.fragment.RegisterFragment;
 import fr.do_f.rssfeedify.main.MainActivity;
+import fr.do_f.rssfeedify.main.menu.adapter.MenuAdapter;
 
 public class LoginActivity extends AppCompatActivity
         implements MenuFragment.OnFragmentInteractionListener {
 
+
+    private static final String     TAG = "LoginActivity";
     private FragmentManager fm;
 
     public static void newActivity(Activity activity)
@@ -43,6 +47,7 @@ public class LoginActivity extends AppCompatActivity
             finish();
         }
 
+        Log.d(TAG, "TAMERE");
         fm = getFragmentManager();
         fm.beginTransaction()
                 .replace(R.id.container, MenuFragment.newInstance())
@@ -61,6 +66,7 @@ public class LoginActivity extends AppCompatActivity
 
     @Override
     public void showLogin() {
+        Log.d(TAG, "showLogin");
         fm.beginTransaction()
                 .replace(R.id.container, LoginFragment.newInstance())
                 .addToBackStack(null)
@@ -69,6 +75,7 @@ public class LoginActivity extends AppCompatActivity
 
     @Override
     public void showRegister() {
+        Log.d(TAG, "showRegister");
         fm.beginTransaction()
                 .replace(R.id.container, RegisterFragment.newInstance())
                 .addToBackStack(null)

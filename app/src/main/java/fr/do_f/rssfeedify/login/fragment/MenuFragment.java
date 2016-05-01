@@ -4,6 +4,7 @@ package fr.do_f.rssfeedify.login.fragment;
 import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +15,7 @@ import butterknife.OnClick;
 import fr.do_f.rssfeedify.R;
 
 public class MenuFragment extends Fragment {
+    private static final String     TAG = "MenuFragment";
 
     private OnFragmentInteractionListener   mListener;
 
@@ -45,10 +47,7 @@ public class MenuFragment extends Fragment {
     }
 
     @OnClick(R.id.menu_login)
-    public void onLoginClick(View v)
-    {
-        mListener.showLogin();
-    }
+    public void onLoginClick(View v) { mListener.showLogin(); }
 
     @OnClick(R.id.menu_register)
     public void onRegisterClick(View v)
