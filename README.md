@@ -14,6 +14,8 @@ API Documentation : http://romain-zanchi.com:4497
 
 Play Store : https://play.google.com/apps/testing/fr.do_f.rssfeedify
 
+![alt tag](http://lapusheen.chat/~do_f/android/RSSFeedify-group.png)
+
 ### External Library used ###
 
 * Retrofit 2.x
