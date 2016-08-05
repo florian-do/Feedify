@@ -11,13 +11,22 @@ I only made the Android Application
 He's actualy on development
 
 API Documentation : http://romain-zanchi.com:4497
+
 Play Store : https://play.google.com/apps/testing/fr.do_f.rssfeedify
+
+![alt tag](http://lapusheen.chat/~do_f/android/RSSFeedify-group.png)
 
 ### External Library used ###
 
 * Retrofit 2.x
 * ButterKnife 7.0.1
 * Fresco (0.9) Facebook Image Library
+
+### Unit test library used ###
+
+* Espresso
+* J-UNIT4
+* Mockito
 
 ### Specs ###
 
