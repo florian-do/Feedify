@@ -29,7 +29,7 @@ import static android.support.test.espresso.matcher.ViewMatchers.withId;
 @LargeTest
 public class RegisterLoginEspressoTest {
     public static final String USERNAME = "espressod";
-    public static final String PASSWORD = "tamerelapute";
+    public static final String PASSWORD = "feedify";
 
     @Rule
     public ActivityTestRule<LoginActivity> mActivityRule = new ActivityTestRule(LoginActivity.class);

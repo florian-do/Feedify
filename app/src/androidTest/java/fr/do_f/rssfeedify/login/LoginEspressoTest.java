@@ -27,7 +27,7 @@ import static android.support.test.espresso.matcher.ViewMatchers.withId;
 public class LoginEspressoTest {
 
     public static final String USERNAME = "espresso";
-    public static final String PASSWORD = "tamerelapute";
+    public static final String PASSWORD = "feedify";
 
 
     @Rule

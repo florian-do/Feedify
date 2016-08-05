@@ -20,7 +20,7 @@ public class RestClient {
     private static ApiService   mRestClient;
     private static ApiService   mTokenRestClient;
 
-    private final static String WEBSERVICE_HOST = "http://romain-zanchi.com:4498/api/";
+    private final static String WEBSERVICE_HOST = "http://lapusheen.chat:4498/api/";
 
     static {
         setupRestClient();
@@ -89,5 +89,4 @@ public class RestClient {
 
         mTokenRestClient = retrofit.create(ApiService.class);
     }
-
 }

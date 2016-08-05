@@ -44,7 +44,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class AllTestEspresso {
     public static final String USERNAME = "espressod";
-    public static final String PASSWORD = "tamerelapute";
+    public static final String PASSWORD = "feedify";
     public static final String FEEDNAME = "Tuxboard";
     public static final String FEEDURL = "http://www.tuxboard.com/feed/";
 

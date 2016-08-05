@@ -39,7 +39,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 public class RegisterEspressoTest {
 
     public static final String USERNAME = "espresso1sssss";
-    public static final String PASSWORD = "tamerelapute";
+    public static final String PASSWORD = "feedify";
 
     private List mockedList;
 
