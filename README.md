@@ -1,15 +1,17 @@
 # RSSFeedify
 RSS Feed Aggregator Android Application
 
+### Note : ###
+
+THIS PROJECT IS NO LONGER BEING MAINTAINED
+EDIT : API SERVER IS DOWN
+
 ### The project ###
 
 ![alt tag](http://lapusheen.chat/~do_f/android/RSSFeedify-logo.png)
 
 RSS Feedify is a fifth years java project at Epitech
 I only made the Android Application
-
-He's actualy on development
-EDIT : API SERVER IS DOWN
 
 API Documentation : http://romain-zanchi.com:4497
 
