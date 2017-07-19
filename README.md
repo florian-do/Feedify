@@ -3,7 +3,7 @@ RSS Feed Aggregator Android Application
 
 ### The project ###
 
-![alt tag](http://62-210-36-42.rev.poneytelecom.eu/~do_f/android/RSSFeedify-logo.png)
+![alt tag]((http://lapusheen.chat/~do_f/android/RSSFeedify-logo.png)
 
 RSS Feedify is a fifth years java project at Epitech
 I only made the Android Application
